@@ -1,0 +1,19 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "Blog languages configuration",
+  "type": "object",
+  "required": ["description", "fallback", "languages"],
+  "additionalProperties": false,
+  "properties": {
+    "$schema": { "type": "string" },
+    "description": { "type": "string" },
+    "fallback": { "type": "string" },
+    "languages": {
+      "type": "array",
+      "minItems": 185,
+      "maxItems": 185,
+      "uniqueItems": true,
+      "items": { "type": "string" }
+    }
+  }
+}
