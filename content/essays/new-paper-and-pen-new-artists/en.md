@@ -1,5 +1,5 @@
 ---
-id: new-paper-new-artists
+id: new-paper-and-pen-new-artists
 type: essay
 locale: en
 title: New Paper and Pen, New Artists
@@ -158,18 +158,18 @@ What is worth creating, and how do we hope people will feel it?
 
 ## References
 
-[1] Andrej Karpathy, “Vibe Coding,” X, 2025-02-02.
+[1] Andrej Karpathy, [X post introducing “vibe coding”](https://x.com/karpathy/status/1886192184808149383), 2025-02-02.
 
-[2] Andrej Karpathy, “Agentic Engineering,” X, 2026-02-04.
+[2] Andrej Karpathy, [X post proposing “agentic engineering”](https://x.com/karpathy/status/2019137879310836075), 2026-02-04.
 
-[3] Jian Wang, “Innovation Comes from ‘Imperfection’ and ‘Crossing Boundaries,’” report on a speech at the 2025 Apsara Conference, 21st Century Business Herald, 2025-09-25.
+[3] Liu Ningxin, [“Wang Jian: Innovation Comes from ‘Imperfection’ and ‘Crossing Boundaries’”](https://www.21jingji.com/article/20250925/herald/63dd40dc7eeb8b21044db93b5a1ae23f.html), *21st Century Business Herald*, 2025-09-25.
 
-[4] Alan M. Turing, “Intelligent Machinery,” 1948.
+[4] Alan M. Turing, [“Intelligent Machinery”](https://www.alanturing.net/turing_archive/archive/l/l32/L32-001.html), National Physical Laboratory report, 1948.
 
-[5] Donald E. Knuth, “Computer Programming as an Art,” Communications of the ACM, 17(12), 1974, pp. 667–673.
+[5] Donald E. Knuth, [“Computer Programming as an Art”](https://doi.org/10.1145/361604.361612), *Communications of the ACM*, 17(12), 1974, pp. 667–673.
 
-[6] Paul Graham, “Hackers and Painters,” May 2003.
+[6] Paul Graham, [“Hackers and Painters”](https://paulgraham.com/hp.html), May 2003.
 
-[7] Bret Taylor, “AI is your ghostwriter, but you are the author,” LinkedIn, 2026-02-10.
+[7] Bret Taylor, [“AI is your ghostwriter, but you are the author”](https://www.linkedin.com/posts/brettaylor_ai-is-your-ghostwriter-but-you-are-the-author-activity-7426807696881815552-Vwr9), LinkedIn, 2026-02-10.
 
-[8] Addy Osmani, Beyond Vibe Coding, O’Reilly Media, August 2025.
+[8] Addy Osmani, [*Beyond Vibe Coding*](https://www.oreilly.com/library/view/beyond-vibe-coding/9798341634749/), O’Reilly Media, August 2025.

@@ -103,6 +103,24 @@ test("the static export contains English, Chinese, and Japanese editions", async
   assert.match(japaneseEssay, /AIはソフトウェアと人間をどう変えるか/);
   assert.match(japaneseEssay, /私たちが言うAIとは、いったい何か/);
   assert.match(japaneseEssay, /AI翻訳/);
+  const referenceUrls = [
+    "https://x.com/karpathy/status/1886192184808149383",
+    "https://x.com/karpathy/status/2019137879310836075",
+    "https://www.21jingji.com/article/20250925/herald/63dd40dc7eeb8b21044db93b5a1ae23f.html",
+    "https://www.alanturing.net/turing_archive/archive/l/l32/L32-001.html",
+    "https://doi.org/10.1145/361604.361612",
+    "https://paulgraham.com/hp.html",
+    "https://www.linkedin.com/posts/brettaylor_ai-is-your-ghostwriter-but-you-are-the-author-activity-7426807696881815552-Vwr9",
+    "https://www.oreilly.com/library/view/beyond-vibe-coding/9798341634749/",
+  ];
+  for (const referenceUrl of referenceUrls) {
+    for (const edition of [englishEssay, essay, japaneseEssay]) {
+      assert.ok(
+        edition.includes(`href="${referenceUrl}"`),
+        `missing reference link ${referenceUrl}`,
+      );
+    }
+  }
   assert.match(
     japaneseEssay,
     /href="\/en\/essay\/new-paper-and-pen-new-artists\/">英語版<\/a>/,

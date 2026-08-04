@@ -5,7 +5,7 @@ import matter from "gray-matter";
 
 const root = process.cwd();
 const sourceLocale = "zh-Hans";
-const sourceDirectory = path.join(root, "content", sourceLocale, "essays");
+const essaysDirectory = path.join(root, "content", "essays");
 const languageConfig = JSON.parse(
   await readFile(path.join(root, "languages.json"), "utf8"),
 );
@@ -148,18 +148,18 @@ function serialize(source, translated, targetLocale, sourceHash) {
   ].join("\n");
 }
 
-async function translateFile(fileName, targetLocale) {
-  const sourcePath = path.join(sourceDirectory, fileName);
+async function translateArticle(articleDirectory, targetLocale) {
+  const articlePath = path.join(essaysDirectory, articleDirectory);
+  const sourcePath = path.join(articlePath, `${sourceLocale}.md`);
   const source = matter(await readFile(sourcePath, "utf8"));
   const sourceHash = hashSource(source);
-  const targetDirectory = path.join(root, "content", targetLocale, "essays");
-  const targetPath = path.join(targetDirectory, fileName);
+  const targetPath = path.join(articlePath, `${targetLocale}.md`);
 
   if (!force) {
     try {
       const existing = matter(await readFile(targetPath, "utf8"));
       if (existing.data.source_hash === sourceHash) {
-        console.log(`skip ${targetLocale}/${fileName}`);
+        console.log(`skip ${articleDirectory}/${targetLocale}.md`);
         return;
       }
     } catch {
@@ -169,21 +169,27 @@ async function translateFile(fileName, targetLocale) {
 
   const translated = await requestTranslation(source, targetLocale);
   const output = serialize(source, translated, targetLocale, sourceHash);
-  await mkdir(targetDirectory, { recursive: true });
+  await mkdir(articlePath, { recursive: true });
   const temporaryPath = `${targetPath}.tmp`;
   await writeFile(temporaryPath, output, "utf8");
   await rename(temporaryPath, targetPath);
-  console.log(`write ${targetLocale}/${fileName}`);
+  console.log(`write ${articleDirectory}/${targetLocale}.md`);
 }
 
-const files = (await readdir(sourceDirectory)).filter((file) => file.endsWith(".md"));
-const jobs = targets.flatMap((locale) => files.map((file) => [file, locale]));
+const articleDirectories = (await readdir(essaysDirectory, {
+  withFileTypes: true,
+}))
+  .filter((entry) => entry.isDirectory())
+  .map((entry) => entry.name);
+const jobs = targets.flatMap((locale) =>
+  articleDirectories.map((articleDirectory) => [articleDirectory, locale]),
+);
 let nextJob = 0;
 
 async function worker() {
   while (nextJob < jobs.length) {
-    const [file, locale] = jobs[nextJob++];
-    await translateFile(file, locale);
+    const [articleDirectory, locale] = jobs[nextJob++];
+    await translateArticle(articleDirectory, locale);
   }
 }
 

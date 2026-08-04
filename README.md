@@ -48,13 +48,13 @@ npm run submit:indexing
 
 ## 发布文章
 
-在以下目录添加 Markdown 文件：
+每篇文章使用独立目录，并以语言标签作为 Markdown 文件名：
 
 ```text
-content/zh-Hans/essays/<slug>.md
+content/essays/<slug>/<locale>.md
 ```
 
-以现有文章的 Front Matter 为模板。添加文件后重启开发服务器，使静态路由参数生效。
+例如中文原文位于 `content/essays/<slug>/zh-Hans.md`，英文和其他语言版本放在同一目录。以现有文章的 Front Matter 为模板；添加文件后重启开发服务器，使静态路由参数生效。
 
 ## 生成翻译
 

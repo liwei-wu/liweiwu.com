@@ -72,7 +72,7 @@ SEO 路由约定：
 ## 新增语言检查清单
 
 1. 确认语言标签已列入 `languages.json`。
-2. 在 `content/<locale>/` 添加完整内容，并填写正确的翻译状态和来源哈希。
+2. 在 `content/essays/<slug>/<locale>.md` 添加完整内容，并填写正确的翻译状态和来源哈希。
 3. 补齐主页、日期、目录、阅读时长、主题按钮和语言选择器等界面文案。
 4. 在 `site.config.ts` 和 `lib/seo.ts` 中补齐作者名、标题、描述及结构化数据文案。
 5. 在 `TranslationNotice` 中添加目标语言的页底提示。

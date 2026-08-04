@@ -78,6 +78,14 @@ function readContentFile(file: string): ContentDocument {
   ) as TranslationStatus;
   const sourceHash =
     typeof data.source_hash === "string" ? data.source_hash.trim() : undefined;
+  const slug = assertString(data.slug, "slug", file);
+
+  if (path.basename(file, ".md") !== locale) {
+    throw new Error(`Content filename must match locale ${locale} in ${file}`);
+  }
+  if (path.basename(path.dirname(file)) !== slug) {
+    throw new Error(`Content directory must match slug ${slug} in ${file}`);
+  }
 
   if (isAiTranslationLocale(locale) && translationStatus !== "ai-translated") {
     throw new Error(
@@ -95,7 +103,7 @@ function readContentFile(file: string): ContentDocument {
     title: assertString(data.title, "title", file),
     subtitle: typeof data.subtitle === "string" ? data.subtitle.trim() : undefined,
     description: assertString(data.description, "description", file),
-    slug: assertString(data.slug, "slug", file),
+    slug,
     publishedAt: assertDate(data.published_at, "published_at", file),
     revisedAt: data.revised_at
       ? assertDate(data.revised_at, "revised_at", file)
@@ -112,25 +120,17 @@ function readContentFile(file: string): ContentDocument {
 export function getAllContent(): ContentDocument[] {
   if (!fs.existsSync(CONTENT_ROOT)) return [];
 
-  const files: string[] = [];
-  for (const localeEntry of fs.readdirSync(CONTENT_ROOT, {
-    withFileTypes: true,
-  })) {
-    if (!localeEntry.isDirectory()) continue;
-    const localePath = path.join(CONTENT_ROOT, localeEntry.name);
-
-    for (const typeEntry of fs.readdirSync(localePath, {
-      withFileTypes: true,
-    })) {
-      if (!typeEntry.isDirectory()) continue;
-      const typePath = path.join(localePath, typeEntry.name);
-      for (const file of fs.readdirSync(typePath)) {
-        if (file.endsWith(".md")) files.push(path.join(typePath, file));
-      }
-    }
+  function findMarkdownFiles(directory: string): string[] {
+    return fs
+      .readdirSync(directory, { withFileTypes: true })
+      .flatMap((entry) => {
+        const entryPath = path.join(directory, entry.name);
+        if (entry.isDirectory()) return findMarkdownFiles(entryPath);
+        return entry.isFile() && entry.name.endsWith(".md") ? [entryPath] : [];
+      });
   }
 
-  return files
+  return findMarkdownFiles(CONTENT_ROOT)
     .map(readContentFile)
     .sort((a, b) => b.publishedAt.localeCompare(a.publishedAt));
 }
