@@ -1,10 +1,21 @@
 import type { Metadata } from "next";
-import { PublicationHome } from "@/components/PublicationHome";
+import { LanguageGateway } from "@/components/LanguageGateway";
 import { getPublishedLocales } from "@/lib/content";
-import { homeMetadata } from "@/lib/seo";
+import { createLanguageOptions } from "@/lib/i18n";
+import { localeHomePath } from "@/lib/routes";
+import { gatewayMetadata } from "@/lib/seo";
 
-export const metadata: Metadata = homeMetadata("en", getPublishedLocales());
+export const metadata: Metadata = gatewayMetadata(getPublishedLocales());
 
 export default function Home() {
-  return <PublicationHome locale="en" autoDetect />;
+  const locales = getPublishedLocales();
+  const destinations = Object.fromEntries(
+    locales.map((locale) => [locale, localeHomePath(locale)]),
+  );
+  return (
+    <LanguageGateway
+      destinations={destinations}
+      options={createLanguageOptions("en", locales, destinations)}
+    />
+  );
 }

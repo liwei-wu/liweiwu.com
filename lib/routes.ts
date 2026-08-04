@@ -1,7 +1,7 @@
 export const DEFAULT_LOCALE = "en";
 
 export function localeHomePath(locale: string): string {
-  return locale === DEFAULT_LOCALE ? "/" : `/${locale}/`;
+  return `/${locale}/`;
 }
 
 export function contentPath(
@@ -9,6 +9,15 @@ export function contentPath(
   type: "essay" | "note",
   slug: string,
 ): string {
-  const path = `/${type}/${slug}/`;
-  return locale === DEFAULT_LOCALE ? path : `/${locale}${path}`;
+  return `/${locale}/${type}/${slug}/`;
 }
+
+export function legacyContentGatewayPath(
+  type: "essay" | "note",
+  slug: string,
+): string {
+  return `/${type}/${slug}/`;
+}
+
+export const LANGUAGE_GATEWAY_PATH = "/";
+export const LANGUAGE_DIRECTORY_PATH = "/languages/";

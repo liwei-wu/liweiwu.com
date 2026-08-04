@@ -1,6 +1,11 @@
 import type { MetadataRoute } from "next";
 import { getAllContent, getPublishedLocales, getTranslations } from "@/lib/content";
-import { contentPath, localeHomePath } from "@/lib/routes";
+import {
+  LANGUAGE_DIRECTORY_PATH,
+  LANGUAGE_GATEWAY_PATH,
+  contentPath,
+  localeHomePath,
+} from "@/lib/routes";
 import { absoluteUrl } from "@/lib/seo";
 import { siteConfig } from "@/site.config";
 
@@ -12,9 +17,7 @@ export default function sitemap(): MetadataRoute.Sitemap {
   const homeLanguages = Object.fromEntries(
     publishedLocales.map((locale) => [locale, absoluteUrl(localeHomePath(locale))]),
   );
-  homeLanguages["x-default"] = absoluteUrl(
-    localeHomePath(siteConfig.defaultLocale),
-  );
+  homeLanguages["x-default"] = absoluteUrl(LANGUAGE_GATEWAY_PATH);
 
   const homes = publishedLocales.map((locale) => {
     const localeDocuments = documents.filter((item) => item.locale === locale);
@@ -65,5 +68,13 @@ export default function sitemap(): MetadataRoute.Sitemap {
     };
   });
 
-  return [...homes, ...articles];
+  return [
+    ...homes,
+    ...articles,
+    {
+      url: absoluteUrl(LANGUAGE_DIRECTORY_PATH),
+      changeFrequency: "monthly" as const,
+      priority: 0.3,
+    },
+  ];
 }

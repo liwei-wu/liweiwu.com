@@ -2,21 +2,16 @@
 
 import Link from "next/link";
 import { useEffect, useState, type ReactNode } from "react";
+import { LanguagePicker } from "@/components/LanguagePicker";
 import type { TocItem } from "@/lib/content";
-import { LanguageSwitcher } from "./LanguageSwitcher";
+import type { LanguageOption } from "@/lib/i18n";
 import { ThemeToggle } from "./ThemeToggle";
-
-interface LocaleOption {
-  locale: string;
-  label: string;
-  href: string;
-}
 
 interface SiteHeaderProps {
   author: string;
   homeHref: string;
   currentLocale: string;
-  localeOptions: LocaleOption[];
+  languageOptions: readonly LanguageOption[];
   toc?: TocItem[];
   contentsLabel?: string;
   children: ReactNode;
@@ -26,7 +21,7 @@ export function SiteHeader({
   author,
   homeHref,
   currentLocale,
-  localeOptions,
+  languageOptions,
   toc = [],
   contentsLabel = "Contents",
   children,
@@ -34,6 +29,17 @@ export function SiteHeader({
   const [menuOpen, setMenuOpen] = useState(false);
   const [activeId, setActiveId] = useState<string>();
   const hasToc = toc.length > 0;
+  const menuLabel = currentLocale.startsWith("zh")
+    ? menuOpen
+      ? "关闭目录"
+      : "打开目录"
+    : currentLocale === "ja"
+      ? menuOpen
+        ? "目次を閉じる"
+        : "目次を開く"
+      : menuOpen
+        ? "Close contents"
+        : "Open contents";
 
   useEffect(() => {
     if (!hasToc) return;
@@ -71,7 +77,7 @@ export function SiteHeader({
             <button
               type="button"
               className="menu-toggle"
-              aria-label={menuOpen ? "Close contents" : "Open contents"}
+              aria-label={menuLabel}
               aria-expanded={menuOpen}
               onClick={() => setMenuOpen((value) => !value)}
             >
@@ -87,11 +93,11 @@ export function SiteHeader({
         </Link>
 
         <div className="header-side header-side-end">
-          <LanguageSwitcher
+          <LanguagePicker
             currentLocale={currentLocale}
-            options={localeOptions}
+            options={languageOptions}
           />
-          <ThemeToggle />
+          <ThemeToggle locale={currentLocale} />
         </div>
       </header>
 

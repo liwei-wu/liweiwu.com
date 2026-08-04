@@ -2,6 +2,7 @@ import fs from "node:fs";
 import path from "node:path";
 import matter from "gray-matter";
 import { marked } from "marked";
+import { isAiTranslationLocale } from "@/lib/localization";
 
 export type ContentType = "essay" | "note";
 export type TranslationStatus =
@@ -69,11 +70,28 @@ function readContentFile(file: string): ContentDocument {
   const topics = Array.isArray(data.topics)
     ? data.topics.map(String)
     : [];
+  const locale = assertString(data.locale, "locale", file);
+  const translationStatus = assertString(
+    data.translation_status,
+    "translation_status",
+    file,
+  ) as TranslationStatus;
+  const sourceHash =
+    typeof data.source_hash === "string" ? data.source_hash.trim() : undefined;
+
+  if (isAiTranslationLocale(locale) && translationStatus !== "ai-translated") {
+    throw new Error(
+      `Non-reference locale ${locale} must use translation_status: ai-translated in ${file}`,
+    );
+  }
+  if (isAiTranslationLocale(locale) && !sourceHash) {
+    throw new Error(`AI-translated content must include source_hash in ${file}`);
+  }
 
   return {
     id: assertString(data.id, "id", file),
     type: assertString(data.type, "type", file) as ContentType,
-    locale: assertString(data.locale, "locale", file),
+    locale,
     title: assertString(data.title, "title", file),
     subtitle: typeof data.subtitle === "string" ? data.subtitle.trim() : undefined,
     description: assertString(data.description, "description", file),
@@ -82,14 +100,9 @@ function readContentFile(file: string): ContentDocument {
     revisedAt: data.revised_at
       ? assertDate(data.revised_at, "revised_at", file)
       : undefined,
-    translationStatus: assertString(
-      data.translation_status,
-      "translation_status",
-      file,
-    ) as TranslationStatus,
+    translationStatus,
     sourceLocale: assertString(data.source_locale, "source_locale", file),
-    sourceHash:
-      typeof data.source_hash === "string" ? data.source_hash.trim() : undefined,
+    sourceHash,
     topics,
     body: content.trim(),
     readingMinutes: estimateReadingMinutes(content),

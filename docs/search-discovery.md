@@ -65,11 +65,11 @@ npm run submit:indexing -- --dry-run
 npm run submit:indexing
 ```
 
-脚本只提交规范 URL，不提交语言跳转、重复 URL 或抓取辅助文件。
+脚本只提交带显式语言前缀的规范 URL，不提交根语言入口、历史无前缀跳转、重复 URL 或抓取辅助文件。
 
 ## 5. 发布后的验收
 
-1. 用 Google 和 Bing 的 URL 检查工具分别检查英文首页、中文首页和一篇文章。
+1. 用 Google 和 Bing 的 URL 检查工具分别检查 `/en/` 英文首页、`/zh-Hans/` 中文首页和一篇带语言前缀的文章。
 2. 在百度抓取诊断中检查中文首页与中文文章。
 3. 用 Google Rich Results Test 检查首页 `ProfilePage` 和文章 `BlogPosting` 数据。
 4. 检查页面源代码中的 Canonical、`hreflang`、标题、描述、Open Graph 和 JSON-LD，而不是只检查浏览器运行后的 DOM。

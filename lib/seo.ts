@@ -1,6 +1,10 @@
 import type { Metadata } from "next";
 import type { ContentDocument } from "@/lib/content";
-import { contentPath, localeHomePath } from "@/lib/routes";
+import {
+  LANGUAGE_GATEWAY_PATH,
+  contentPath,
+  localeHomePath,
+} from "@/lib/routes";
 import { siteConfig } from "@/site.config";
 
 const verificationOther = Object.fromEntries(
@@ -20,12 +24,29 @@ export function isChineseLocale(locale: string): boolean {
   return locale.toLowerCase().startsWith("zh");
 }
 
+export function isJapaneseLocale(locale: string): boolean {
+  return locale.toLowerCase() === "ja" || locale.toLowerCase().startsWith("ja-");
+}
+
 export function localeCopy(locale: string) {
   const chinese = isChineseLocale(locale);
+  const japanese = isJapaneseLocale(locale);
   return {
-    author: chinese ? siteConfig.authorChinese : siteConfig.author,
-    description: chinese ? siteConfig.description.zh : siteConfig.description.en,
-    homeTitle: chinese ? siteConfig.homeTitle.zh : siteConfig.homeTitle.en,
+    author: chinese
+      ? siteConfig.authorChinese
+      : japanese
+        ? siteConfig.authorJapanese
+        : siteConfig.author,
+    description: chinese
+      ? siteConfig.description.zh
+      : japanese
+        ? siteConfig.description.ja
+        : siteConfig.description.en,
+    homeTitle: chinese
+      ? siteConfig.homeTitle.zh
+      : japanese
+        ? siteConfig.homeTitle.ja
+        : siteConfig.homeTitle.en,
   };
 }
 
@@ -33,15 +54,16 @@ function openGraphLocale(locale: string): string {
   if (locale === "zh-Hans") return "zh_CN";
   if (locale === "zh-Hant") return "zh_TW";
   if (locale === "en") return "en_US";
+  if (locale === "ja") return "ja_JP";
   return locale.replace("-", "_");
 }
 
-function socialImage() {
+function socialImage(locale = "en") {
   return {
     url: absoluteUrl(siteConfig.socialImage),
     width: 1200,
     height: 630,
-    alt: "Liwei Wu — AI, software, and authorship",
+    alt: localeCopy(locale).homeTitle,
   };
 }
 
@@ -91,13 +113,13 @@ export function rootMetadata(locale: string): Metadata {
       title: copy.homeTitle,
       description: copy.description,
       locale: openGraphLocale(locale),
-      images: [socialImage()],
+      images: [socialImage(locale)],
     },
     twitter: {
       card: "summary_large_image",
       title: copy.homeTitle,
       description: copy.description,
-      images: [socialImage()],
+      images: [socialImage(locale)],
     },
   };
 }
@@ -111,7 +133,7 @@ export function homeMetadata(
   const languages = Object.fromEntries(
     publishedLocales.map((item) => [item, absoluteUrl(localeHomePath(item))]),
   );
-  languages["x-default"] = absoluteUrl(localeHomePath(siteConfig.defaultLocale));
+  languages["x-default"] = absoluteUrl(LANGUAGE_GATEWAY_PATH);
 
   return {
     title: { absolute: copy.homeTitle },
@@ -134,15 +156,52 @@ export function homeMetadata(
         .filter((item) => item !== locale)
         .map(openGraphLocale),
       firstName: locale === "en" ? "Liwei" : "立威",
-      lastName: locale === "en" ? "Wu" : "吴",
+      lastName: isJapaneseLocale(locale) ? "呉" : locale === "en" ? "Wu" : "吴",
       username: siteConfig.author,
-      images: [socialImage()],
+      images: [socialImage(locale)],
     },
     twitter: {
       card: "summary_large_image",
       title: copy.homeTitle,
       description: copy.description,
-      images: [socialImage()],
+      images: [socialImage(locale)],
+    },
+  };
+}
+
+export function gatewayMetadata(
+  publishedLocales: readonly string[],
+): Metadata {
+  const copy = localeCopy(siteConfig.defaultLocale);
+  const languages = Object.fromEntries(
+    publishedLocales.map((locale) => [
+      locale,
+      absoluteUrl(localeHomePath(locale)),
+    ]),
+  );
+  languages["x-default"] = absoluteUrl(LANGUAGE_GATEWAY_PATH);
+
+  return {
+    title: { absolute: copy.homeTitle },
+    description: copy.description,
+    alternates: {
+      canonical: absoluteUrl(LANGUAGE_GATEWAY_PATH),
+      languages,
+      types: { "application/rss+xml": absoluteUrl("/feed.xml") },
+    },
+    openGraph: {
+      type: "website",
+      url: absoluteUrl(LANGUAGE_GATEWAY_PATH),
+      siteName: siteConfig.siteName,
+      title: copy.homeTitle,
+      description: copy.description,
+      images: [socialImage(siteConfig.defaultLocale)],
+    },
+    twitter: {
+      card: "summary_large_image",
+      title: copy.homeTitle,
+      description: copy.description,
+      images: [socialImage(siteConfig.defaultLocale)],
     },
   };
 }
@@ -178,7 +237,14 @@ export function contentMetadata(
     title: { absolute: title },
     description: document.description,
     authors: [{ name: copy.author, url: absoluteUrl(localeHomePath(document.locale)) }],
-    category: document.type === "essay" ? "Essay" : "Note",
+    category:
+      document.locale === "ja"
+        ? document.type === "essay"
+          ? "エッセイ"
+          : "ノート"
+        : document.type === "essay"
+          ? "Essay"
+          : "Note",
     alternates: {
       canonical: absoluteUrl(path),
       languages,
@@ -199,27 +265,75 @@ export function contentMetadata(
       publishedTime: document.publishedAt,
       modifiedTime: document.revisedAt ?? document.publishedAt,
       authors: [absoluteUrl(localeHomePath(document.locale))],
-      section: document.type === "essay" ? "Essays" : "Notes",
+      section:
+        document.locale === "ja"
+          ? document.type === "essay"
+            ? "エッセイ"
+            : "ノート"
+          : document.type === "essay"
+            ? "Essays"
+            : "Notes",
       tags: document.topics,
-      images: [socialImage()],
+      images: [socialImage(document.locale)],
     },
     twitter: {
       card: "summary_large_image",
       title,
       description: document.description,
-      images: [socialImage()],
+      images: [socialImage(document.locale)],
     },
+  };
+}
+
+export function legacyContentGatewayMetadata(
+  document: ContentDocument,
+  translations: readonly ContentDocument[],
+): Metadata {
+  const canonical =
+    translations.find((item) => item.locale === siteConfig.defaultLocale) ??
+    translations.find((item) => item.locale === document.sourceLocale) ??
+    document;
+  const languages = Object.fromEntries(
+    translations.map((translation) => [
+      translation.locale,
+      absoluteUrl(
+        contentPath(translation.locale, translation.type, translation.slug),
+      ),
+    ]),
+  );
+  languages["x-default"] = absoluteUrl(
+    contentPath(canonical.locale, canonical.type, canonical.slug),
+  );
+
+  return {
+    title: { absolute: document.title },
+    description: document.description,
+    alternates: {
+      canonical: absoluteUrl(
+        contentPath(canonical.locale, canonical.type, canonical.slug),
+      ),
+      languages,
+    },
+    robots: { index: false, follow: true },
   };
 }
 
 function personNode(locale: string, detailed = true) {
   const chinese = isChineseLocale(locale);
+  const japanese = isJapaneseLocale(locale);
+  const author = localeCopy(locale).author;
   const node: Record<string, unknown> = {
     "@type": "Person",
     "@id": `${siteConfig.siteUrl}/#person`,
-    name: chinese ? siteConfig.authorChinese : siteConfig.author,
-    alternateName: [chinese ? siteConfig.author : siteConfig.authorChinese],
-    url: absoluteUrl("/"),
+    name: author,
+    alternateName: [
+      ...new Set(
+        [siteConfig.author, siteConfig.authorChinese, siteConfig.authorJapanese].filter(
+          (name) => name !== author,
+        ),
+      ),
+    ],
+    url: absoluteUrl(localeHomePath("en")),
     sameAs: [siteConfig.scholarUrl],
   };
 
@@ -227,19 +341,34 @@ function personNode(locale: string, detailed = true) {
     node.description = localeCopy(locale).description;
     node.jobTitle = chinese
       ? ["AI 应用创业者", "深度飞轮创始人"]
-      : ["AI Application Entrepreneur", "Founder of DeepFlywheel"];
+      : japanese
+        ? ["AIアプリケーション起業家", "DeepFlywheel創業者"]
+        : ["AI Application Entrepreneur", "Founder of DeepFlywheel"];
     node.worksFor = { "@id": `${siteConfig.company.url}#organization` };
-    node.alumniOf = [
-      { "@type": "CollegeOrUniversity", name: "Nanjing University" },
-      { "@type": "CollegeOrUniversity", name: "Tsinghua University" },
-    ];
-    node.knowsAbout = [
-      "Artificial intelligence",
-      "AI applications",
-      "Software engineering",
-      "Computer vision",
-      "Intelligent hardware-software systems",
-    ];
+    node.alumniOf = japanese
+      ? [
+          { "@type": "CollegeOrUniversity", name: "南京大学" },
+          { "@type": "CollegeOrUniversity", name: "清華大学" },
+        ]
+      : [
+          { "@type": "CollegeOrUniversity", name: "Nanjing University" },
+          { "@type": "CollegeOrUniversity", name: "Tsinghua University" },
+        ];
+    node.knowsAbout = japanese
+      ? [
+          "人工知能",
+          "AIアプリケーション",
+          "ソフトウェア工学",
+          "コンピュータビジョン",
+          "知能化ハードウェア・ソフトウェアシステム",
+        ]
+      : [
+          "Artificial intelligence",
+          "AI applications",
+          "Software engineering",
+          "Computer vision",
+          "Intelligent hardware-software systems",
+        ];
   }
 
   return node;
@@ -311,7 +440,11 @@ export function homeStructuredData(
       {
         "@type": "ItemList",
         "@id": `${absoluteUrl(path)}#publications`,
-        name: isChineseLocale(locale) ? "吴立威的文章" : "Essays by Liwei Wu",
+        name: isChineseLocale(locale)
+          ? "吴立威的文章"
+          : isJapaneseLocale(locale)
+            ? "呉立威のエッセイ"
+            : "Essays by Liwei Wu",
         itemListElement: items,
       },
     ],

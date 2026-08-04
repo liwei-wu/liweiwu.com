@@ -6,6 +6,7 @@
 
 - 中文名：吴立威
 - 英文名：Liwei Wu
+- 日文名：呉立威
 
 ## 本地开发
 
@@ -14,7 +15,7 @@ npm install
 npm run dev
 ```
 
-打开 <http://localhost:3000>。英文为默认语言，URL 不带语言前缀。根路由优先使用用户保存的语言偏好，其次匹配浏览器语言；若没有对应的已发布版本，则使用英文。
+打开 <http://localhost:3000>。根路由只负责匹配用户保存的语言或浏览器语言，并跳转到显式语言路径；若没有对应的已发布版本，则进入 `/en/`。
 
 构建并运行测试：
 
@@ -87,8 +88,12 @@ CONFIRM_ALL_TRANSLATIONS=1 npm run translate -- --all
 
 译文以普通 Markdown 文件保存，并包含 `source_hash`；源文未变时会跳过生成。简体中文原稿使用 `original`，人工审校后的译文使用 `author-reviewed`，未经审校的译文保留 `ai-translated` 标记。
 
+翻译状态、非中英文页面的页底提示、相对链接和新增语言检查清单见 [多语言发布规范](docs/localization.md)。
+
 ## 语言规则
 
 `languages.json` 包含 185 个语言标签：采用现行 ISO 639 Set 1 列表，并以 `zh-Hans` 和 `zh-Hant` 取代 `zh`。地区变体会匹配相应的基础语言，例如 `zh-Hant-HK` 和 `zh-Hant-TW` 均匹配 `zh-Hant`。
 
-英文页面使用 `/` 和 `/essay/<slug>/`；其他语言带语言前缀，如 `/zh-Hans/` 和 `/zh-Hans/essay/<slug>/`。若当前文章有对应译文，切换语言后仍会停留在该文章。
+所有正式内容都使用显式语言前缀，例如 `/en/`、`/zh-Hans/`、`/ja/` 和 `/en/essay/<slug>/`。`/` 是自动语言入口，不承载正式英文版本；历史无前缀文章路径仅作为不收录的兼容跳转入口。
+
+顶部使用无文字的地球图标打开可搜索语言选择器。选择器只列出已经发布的语言，并按当前页面跳转到对应译文；完整的可抓取语言目录位于 `/languages/`。非中英文页面底部提供同页 `/en/` 英文版和 `/zh-Hans/` 中文版链接。完整规则见 [多语言发布规范](docs/localization.md)。

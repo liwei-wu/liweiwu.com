@@ -11,7 +11,7 @@ export const dynamicParams = false;
 
 export function generateStaticParams() {
   return getAllContent()
-    .filter((document) => document.type === "essay" && document.locale !== "en")
+    .filter((document) => document.type === "essay")
     .map((document) => ({ locale: document.locale, slug: document.slug }));
 }
 

@@ -1,7 +1,9 @@
 import type { Metadata } from "next";
-import { EssayView } from "@/components/EssayView";
+import { LanguageGateway } from "@/components/LanguageGateway";
 import { getAllContent, getContent, getTranslations } from "@/lib/content";
-import { contentMetadata } from "@/lib/seo";
+import { createLanguageOptions } from "@/lib/i18n";
+import { contentPath } from "@/lib/routes";
+import { legacyContentGatewayMetadata } from "@/lib/seo";
 
 interface EssayPageProps {
   params: Promise<{ slug: string }>;
@@ -19,10 +21,28 @@ export async function generateMetadata({ params }: EssayPageProps): Promise<Meta
   const { slug } = await params;
   const essay = getContent("en", "essay", slug);
   if (!essay) return {};
-  return contentMetadata(essay, getTranslations(essay.id));
+  return legacyContentGatewayMetadata(essay, getTranslations(essay.id));
 }
 
 export default async function EnglishEssayPage({ params }: EssayPageProps) {
   const { slug } = await params;
-  return <EssayView locale="en" slug={slug} autoDetect />;
+  const essay = getContent("en", "essay", slug);
+  if (!essay) return null;
+  const translations = getTranslations(essay.id);
+  const destinations = Object.fromEntries(
+    translations.map((translation) => [
+      translation.locale,
+      contentPath(translation.locale, translation.type, translation.slug),
+    ]),
+  );
+  return (
+    <LanguageGateway
+      destinations={destinations}
+      options={createLanguageOptions(
+        "en",
+        translations.map((translation) => translation.locale),
+        destinations,
+      )}
+    />
+  );
 }

@@ -25,11 +25,11 @@ ${document.subtitle ? `### ${document.subtitle}\n\n` : ""}${document.body}
     )
     .join("\n---\n\n");
 
-  const body = `# Liwei Wu / 吴立威 — Full publication corpus
+  const body = `# Liwei Wu / 吴立威 / 呉立威 — Full publication corpus
 
 Canonical site: ${absoluteUrl("/")}
 
-Author: ${siteConfig.author} (${siteConfig.authorChinese})
+Author: ${siteConfig.author} (${siteConfig.authorChinese}; ${siteConfig.authorJapanese})
 
 ${siteConfig.description.en}
 

@@ -8,7 +8,7 @@ description: When implementation is no longer the scarcest part, what does human
 slug: new-paper-and-pen-new-artists
 published_at: 2026-08-03
 revised_at: 2026-08-03
-translation_status: ai-translated
+translation_status: author-reviewed
 source_locale: zh-Hans
 topics:
   - AI

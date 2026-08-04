@@ -16,9 +16,7 @@ async function canonicalUrls() {
     .filter((entry) => entry.isDirectory())
     .map((entry) => entry.name)
     .sort();
-  const urls = locales.map((locale) =>
-    locale === "en" ? `${siteUrl}/` : `${siteUrl}/${locale}/`,
-  );
+  const urls = locales.map((locale) => `${siteUrl}/${locale}/`);
 
   for (const locale of locales) {
     const localeDirectory = path.join(contentRoot, locale);
@@ -30,8 +28,7 @@ async function canonicalUrls() {
       const files = (await readdir(directory)).filter((file) => file.endsWith(".md"));
       for (const file of files) {
         const { data } = matter(await readFile(path.join(directory, file), "utf8"));
-        const prefix = locale === "en" ? "" : `/${locale}`;
-        urls.push(`${siteUrl}${prefix}/${type}/${data.slug}/`);
+        urls.push(`${siteUrl}/${locale}/${type}/${data.slug}/`);
       }
     }
   }

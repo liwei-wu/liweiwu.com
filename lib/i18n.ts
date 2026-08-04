@@ -38,6 +38,14 @@ export function matchLocale(
   available: readonly string[],
   fallback = DEFAULT_LOCALE,
 ): string {
+  return findLocaleMatch(requested, available) ??
+    (available.includes(fallback) ? fallback : available[0] ?? fallback);
+}
+
+export function findLocaleMatch(
+  requested: readonly string[],
+  available: readonly string[],
+): string | undefined {
   const availableSet = new Set(available);
 
   for (const rawTag of requested) {
@@ -57,17 +65,46 @@ export function matchLocale(
     if (direct) return direct;
     if (availableSet.has(base)) return base;
   }
-
-  return availableSet.has(fallback) ? fallback : available[0] ?? fallback;
 }
 
-export function getLanguageLabel(locale: string): string {
+export function getLanguageLabel(
+  locale: string,
+  displayLocale = locale,
+): string {
   try {
-    const displayNames = new Intl.DisplayNames([locale], { type: "language" });
+    const displayNames = new Intl.DisplayNames([displayLocale], {
+      type: "language",
+    });
     return displayNames.of(locale) ?? locale;
   } catch {
     return locale;
   }
+}
+
+export interface LanguageOption {
+  locale: string;
+  nativeName: string;
+  currentName: string;
+  englishName: string;
+  href?: string;
+}
+
+export function createLanguageOptions(
+  currentLocale: string,
+  locales: readonly string[],
+  destinations: Readonly<Record<string, string | undefined>>,
+): LanguageOption[] {
+  return locales
+    .map((locale) => ({
+      locale,
+      nativeName: getLanguageLabel(locale),
+      currentName: getLanguageLabel(locale, currentLocale),
+      englishName: getLanguageLabel(locale, "en"),
+      href: destinations[locale],
+    }))
+    .sort((a, b) =>
+      a.englishName.localeCompare(b.englishName, "en", { sensitivity: "base" }),
+    );
 }
 
 export function formatDate(date: string, locale: string): string {

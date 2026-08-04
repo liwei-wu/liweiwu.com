@@ -16,7 +16,7 @@ export function GET() {
     )
     .join("\n");
 
-  const body = `# Liwei Wu / 吴立威
+  const body = `# Liwei Wu / 吴立威 / 呉立威
 
 > Liwei Wu (吴立威) is an AI application entrepreneur, founder of DeepFlywheel, former SenseTime R&D director, and writer on AI, software, and authorship.
 
@@ -26,6 +26,7 @@ This is the canonical personal publication of Liwei Wu. Simplified Chinese is th
 
 - [English profile](${absoluteUrl(localeHomePath("en"))})
 - [简体中文主页](${absoluteUrl(localeHomePath("zh-Hans"))})
+- [日本語プロフィール](${absoluteUrl(localeHomePath("ja"))})
 - [Google Scholar](${siteConfig.scholarUrl})
 - [DeepFlywheel](${siteConfig.company.url})
 
