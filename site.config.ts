@@ -27,6 +27,14 @@ export const siteConfig = {
         zhHans: "https://www.sensetime.com/cn/index",
       },
     },
+    miracleplus: {
+      name: "MiraclePlus",
+      nameChinese: "奇绩创坛",
+      urls: {
+        en: "https://www.miracleplus.com/",
+        zhHans: "https://www.miracleplus.com/cn/",
+      },
+    },
     nanjingUniversity: {
       name: "Nanjing University",
       nameChinese: "南京大学",

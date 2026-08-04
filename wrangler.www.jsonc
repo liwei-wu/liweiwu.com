@@ -1,0 +1,13 @@
+{
+  "$schema": "./node_modules/wrangler/config-schema.json",
+  "name": "liweiwu-com-www",
+  "main": "./worker.www.js",
+  "compatibility_date": "2026-08-04",
+  "workers_dev": false,
+  "routes": [
+    {
+      "pattern": "www.liweiwu.com",
+      "custom_domain": true
+    }
+  ]
+}

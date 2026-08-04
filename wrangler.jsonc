@@ -1,0 +1,20 @@
+{
+  "$schema": "./node_modules/wrangler/config-schema.json",
+  "name": "liweiwu-com",
+  "main": "./worker.apex.js",
+  "compatibility_date": "2026-08-04",
+  "workers_dev": false,
+  "assets": {
+    "directory": "./out",
+    "binding": "ASSETS",
+    "run_worker_first": true,
+    "not_found_handling": "404-page",
+    "html_handling": "auto-trailing-slash"
+  },
+  "routes": [
+    {
+      "pattern": "liweiwu.com",
+      "custom_domain": true
+    }
+  ]
+}

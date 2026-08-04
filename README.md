@@ -25,6 +25,8 @@ npm test
 
 构建结果导出到 `out/`，可部署至任意静态托管服务。本仓库不含 Codex Sites 部署配置。
 
+生产环境使用 Cloudflare Workers Static Assets；域名、Worker、凭据入口、发布命令和验收方法见 [Cloudflare 上线与运维](docs/cloudflare-deployment.md)。
+
 ## 搜索与 AI 收录
 
 构建会生成以下公开入口：
@@ -78,7 +80,7 @@ content/essays/<slug>/<locale>.md
 
 A0 语言属于受保护的权威参考版本：简体中文原稿使用 `original`，人工审校后的英文使用 `author-reviewed`。A1 文件使用 `ai-translated`，并在 Front Matter 中保存参考文本的 `source_hash`；修改 A0 内容后，应重新核对所有已发布的 A1 版本并更新该值。构建和测试会检查首页与界面文案完整覆盖已配置语言，并检查每篇文章已经发布的语言版本是否符合对应等级要求。
 
-翻译状态、A1 页面的 AI 翻译提示、相对链接和新增语言检查清单见 [多语言发布规范](docs/localization.md)；A0/A1 语言等级、出处和适用边界见 [翻译语言发布等级](docs/translation-language-tiers.md)。
+翻译状态、A1 页面的 AI 翻译提示、相对链接和新增语言检查清单见 [多语言发布规范](docs/localization.md)；品牌、产品、人物和核心概念的标准写法见 [内容翻译词汇表](docs/translation-glossary.md)；A0/A1 语言等级、出处和适用边界见 [翻译语言发布等级](docs/translation-language-tiers.md)。
 
 ## 语言规则
 

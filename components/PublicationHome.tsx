@@ -71,10 +71,11 @@ export function PublicationHome({ locale }: PublicationHomeProps) {
                   <Link href={contentPath(locale, essay.slug)}>
                     {essay.title}
                   </Link>
+                  {!chinese && !japanese ? " " : null}
                   <span className="publication-date-inline">
                     {chinese || japanese
                       ? `（${formatMonth(essay.publishedAt, locale)}）`
-                      : ` (${formatMonth(essay.publishedAt, locale)})`}
+                      : `(${formatMonth(essay.publishedAt, locale)})`}
                   </span>
                 </li>
               ))}
