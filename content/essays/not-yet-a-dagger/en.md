@@ -2,7 +2,7 @@
 id: not-yet-a-dagger
 type: essay
 locale: en
-title: A Tip Alone Is Not a Dagger
+title: A Blade Tip Alone Is Not a Dagger
 description: After receiving investment from MiraclePlus, we moved from pursuing a complete second brain to smaller products and began to understand that small, minimal, fast, and cool do not necessarily mean sharp.
 slug: not-yet-a-dagger
 published_at: 2025-12-31
@@ -28,7 +28,7 @@ Users quickly raised many issues. We had known about a substantial number of the
 
 Looking back, that beta test divided 2025 into two halves. During the first half, we continued building MagicGourd, hoping to make its magic finally appear. In the middle of the year, we extracted one idea into Sayso, built it quickly, and put it in front of users. In the second half, instead of continuing to chase release speed, we turned to building our product capabilities. The starting point for all of this came at the beginning of the year, when we received investment from [MiraclePlus][entity-miracleplus] and joined its accelerator.
 
-By the end of the year, we still had not made that dagger. But we had begun to understand: a tip alone is not a dagger.
+By the end of the year, we still had not made that dagger. But we had begun to understand: a blade tip alone is not a dagger.
 
 ## An Interview I Had Not Planned to Attend
 
@@ -50,7 +50,7 @@ This time, I was not in such a hurry.
 
 After a full year of development in 2024, we were still in the water, but no longer struggling as we had just after jumping in. I did not try to prove that I must be right, and I had not prepared heavily polished answers. I simply said what I genuinely thought.
 
-Dr. Qi Lu asked what I thought of SenseTime. I said that, first of all, I was deeply grateful to the company, because I had gone through a crucial period of growth and transformation there. Around the arrival of ChatGPT, SenseTime may have been slightly slow to respond because a large ship is difficult to turn. But by 2025, I could see it changing quickly, and I believed a better era for SenseTime was arriving.
+Dr. Lu Qi asked what I thought of SenseTime. I said that, first of all, I was deeply grateful to the company, because I had gone through a crucial period of growth and transformation there. Around the arrival of ChatGPT, SenseTime may have been slightly slow to respond because a large ship is difficult to turn. But by 2025, I could see it changing quickly, and I believed a better era for SenseTime was arriving.
 
 He then asked what I thought of DeepSeek. My answer was one word: cost. I did not elaborate at the time. I simply believed that cost would directly affect the scale at which a technology could enter the real world.
 
@@ -200,7 +200,7 @@ That is what it means to say that fundraising is not only about money. It may no
 
 By the end of 2025, my understanding of a dagger was different from what it had been at the beginning of the year.
 
-Insight into the user’s problem was the tip. Interaction, interface, and product experience formed the edge. Functional completeness was the body of the blade. Reliability and maintainability were like the handle, allowing someone to truly hold and use it.
+Insight into the user’s problem was the blade tip. Interaction, interface, and product experience formed the edge. Functional completeness was the body of the blade. Reliability and maintainability were like the handle, allowing someone to truly hold and use it.
 
 A single sharp point could at most become an impressive demo. It was not yet a dagger someone could actually use.
 
@@ -220,4 +220,4 @@ As of today, we have not yet made that fully formed dagger.
 
 We have only begun learning how to sharpen it.
 
-A tip alone is not a dagger.
+A blade tip alone is not a dagger.

@@ -18,7 +18,7 @@
 
 | 简体中文原词 | 英文及非中文语言标准写法 | 繁体中文 | 使用说明 | 禁止写法 |
 | --- | --- | --- | --- | --- |
-| 魔法葫芦（产品名） | `MagicGourd` | 魔法葫蘆 | 非中文译文一律保留 `MagicGourd`，大小写与空格不得改变。 | `MagicGourd`、`Magicgourd`、`magicgourd` |
+| 魔法葫芦（产品名） | `MagicGourd` | 魔法葫蘆 | 非中文译文一律保留 `MagicGourd`，大小写与空格不得改变。 | `Magic Gourd`、`Magicgourd`、`magicgourd` |
 | Sayso | `Sayso` | `Sayso` | 产品名不翻译，不拆词；视为一个完整的品牌词。 | `SaySo`、`Say So`、`sayso` |
 | 深度飞轮 | `DeepFlywheel` | 深度飛輪 | 英文及非中文译文使用官方品牌名 `DeepFlywheel`。 | `Deep Flywheel`、`Deepflywheel` |
 | 商汤科技 / 商汤 | `SenseTime` | 商湯科技 / 商湯 | 正式机构名使用 `SenseTime`；正文中的简称也不得译成字面意义上的 “business soup”。 | `Sense Time`、字面翻译 |
@@ -94,7 +94,7 @@ First, make a gourd that could hold these points.
 
 ## 已知待迁移内容
 
-当前 `gourd-before-magic` 的英文审校版及 A1 译文普遍把产品名写成了 `MagicGourd`。后续迁移时应：
+当前 `gourd-before-magic` 的英文审校版及 A1 译文普遍把产品名写成了 `Magic Gourd`。后续迁移时应：
 
 1. 将产品名和品牌主题统一为 `MagicGourd`。
 2. 保留文章标题及正文隐喻中作为普通名词使用的 `gourd`。

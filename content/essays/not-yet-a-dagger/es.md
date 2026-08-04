@@ -50,7 +50,7 @@ Esta vez, no tenía tanta prisa.
 
 Después de un año completo de desarrollo en 2024, todavía estábamos en el agua, pero ya no teníamos dificultades como lo hicimos justo después de saltar. No intenté demostrar que debía tener razón y no había preparado respuestas muy pulidas. Simplemente dije lo que realmente pensaba.
 
-El Dr. Qi Lu me preguntó qué pensaba de SenseTime. Dije que, en primer lugar, estaba profundamente agradecido con la empresa, porque allí había pasado por un período crucial de crecimiento y transformación. Alrededor de la llegada de ChatGPT, es posible que SenseTime haya tardado un poco en responder porque es difícil girar un barco grande. Pero para 2025, pude ver que esto cambiaría rápidamente y creí que estaba llegando una era mejor para SenseTime.
+El Dr. Lu Qi me preguntó qué pensaba de SenseTime. Dije que, en primer lugar, estaba profundamente agradecido con la empresa, porque allí había pasado por un período crucial de crecimiento y transformación. Alrededor de la llegada de ChatGPT, es posible que SenseTime haya tardado un poco en responder porque es difícil girar un barco grande. Pero para 2025, pude ver que esto cambiaría rápidamente y creí que estaba llegando una era mejor para SenseTime.
 
 Luego me preguntó qué pensaba de DeepSeek. Mi respuesta fue una palabra: costo. No di más detalles en ese momento. Simplemente creía que el costo afectaría directamente la escala a la que una tecnología podría ingresar al mundo real.
 
