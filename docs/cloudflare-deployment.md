@@ -146,7 +146,7 @@ curl -I https://liweiwu.com/feed.xml
 - `https://www.liweiwu.com/...`：308，`Location` 指向 HTTPS apex。
 - 不存在的页面：404，而不是软 404。
 - `sitemap.xml`：200，`Content-Type` 是 `application/xml`。
-- TLS 校验成功，证书 SAN 同时覆盖 `liweiwu.com` 和 `*.liweiwu.com`。
+- TLS 校验成功，证书 SAN 至少同时覆盖 `liweiwu.com` 和 `www.liweiwu.com`；Cloudflare 可能同时加入其托管所需的其他 SAN，不依赖某个固定的通配符形式。
 
 检查 Canonical 与证书：
 

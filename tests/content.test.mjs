@@ -1,5 +1,5 @@
 import assert from "node:assert/strict";
-import { readFile } from "node:fs/promises";
+import { readFile, readdir } from "node:fs/promises";
 import test from "node:test";
 
 const root = new URL("../", import.meta.url);
@@ -30,3 +30,52 @@ test("home introductions are localized content documents", async () => {
   assert.doesNotMatch(siteConfig, /homeTitle|description:/);
 });
 
+test("published blog editions and translation tooling follow the controlled glossary", async () => {
+  const essayRoot = new URL("content/essays/", root);
+  const essayDirectories = (await readdir(essayRoot, { withFileTypes: true }))
+    .filter((entry) => entry.isDirectory());
+  const sources = [];
+
+  for (const directory of essayDirectories) {
+    const directoryUrl = new URL(`${directory.name}/`, essayRoot);
+    const filenames = (await readdir(directoryUrl))
+      .filter((filename) => filename.endsWith(".md"));
+    for (const filename of filenames) {
+      sources.push({
+        file: `content/essays/${directory.name}/${filename}`,
+        text: await readFile(new URL(filename, directoryUrl), "utf8"),
+      });
+    }
+  }
+
+  sources.push({
+    file: "scripts/translate-not-yet-a-dagger.mjs",
+    text: await readFile(
+      new URL("scripts/translate-not-yet-a-dagger.mjs", root),
+      "utf8",
+    ),
+  });
+
+  const forbiddenSpellings = [
+    /Magic Gourd/,
+    /Magicgourd/,
+    /magicgourd/,
+    /SaySo/,
+    /Say So/,
+    /\bsayso\b/,
+    /Deep Flywheel/,
+    /Deepflywheel/,
+    /Sense Time/,
+    /Miracle Plus/,
+    /Miracle Forum/,
+    /Miracle Camp/,
+    /Qi Lu/,
+    /Qinghua University/,
+  ];
+
+  for (const { file, text } of sources) {
+    for (const spelling of forbiddenSpellings) {
+      assert.doesNotMatch(text, spelling, `${file} contains ${spelling}`);
+    }
+  }
+});

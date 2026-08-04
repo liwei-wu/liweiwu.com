@@ -110,7 +110,7 @@ function replacementsFor(sourceLocale, targetLocale) {
     ["ChatGPT", "ZXQCHATGPTZXQ", "ChatGPT"],
     [sourceLocale === "zh-Hans" ? "科含" : "Kehan", "ZXQKEHANZXQ", isTraditional ? "科含" : "Kehan"],
     ["Peter", "ZXQPETERZXQ", "Peter"],
-    ["Qi Lu", "ZXQQILUZXQ", "Qi Lu"],
+    [sourceLocale === "zh-Hans" ? "陆奇博士" : "Dr. Lu Qi", "ZXQQILUZXQ", isTraditional ? "陸奇博士" : "Dr. Lu Qi"],
     ["AI", "ZXQAIZXQ", "AI"],
     ["UI", "ZXQUIZXQ", "UI"],
     ["PDF", "ZXQPDFZXQ", "PDF"],

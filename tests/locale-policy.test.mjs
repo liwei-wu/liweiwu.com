@@ -105,6 +105,9 @@ async function assertCompleteTranslationSet(directory, config) {
       await readFile(new URL(`${rule.tag}.md`, directory), "utf8"),
     );
     assert.equal(document.data.locale, rule.tag);
+    assert.equal(document.data.id, source.data.id);
+    assert.equal(document.data.type, source.data.type);
+    assert.equal(document.data.slug, source.data.slug);
     assert.equal(document.data.translation_status, rule.translationStatus);
     assert.equal(document.data.source_locale, config.sourceLocale);
     assert.doesNotMatch(document.content, /\p{Cf}/u);
@@ -143,6 +146,13 @@ async function assertPublishedEssaySet(directory, config) {
       await readFile(new URL(`${locale}.md`, directory), "utf8"),
     );
     assert.equal(document.data.locale, locale);
+    assert.equal(document.data.id, source.data.id);
+    assert.equal(document.data.type, "essay");
+    assert.equal(document.data.slug, source.data.slug);
+    assert.equal(
+      String(document.data.published_at),
+      String(source.data.published_at),
+    );
     assert.equal(document.data.translation_status, rule.translationStatus);
     assert.equal(document.data.source_locale, config.sourceLocale);
     assert.doesNotMatch(document.content, /\p{Cf}/u);
@@ -150,10 +160,13 @@ async function assertPublishedEssaySet(directory, config) {
     assert.doesNotMatch(document.content, /\]\s+\(https?:\/\//);
     assert.doesNotMatch(document.content, /\]\(http(?:x\.com|www\.|doi\.)/);
 
+    if (locale !== config.sourceLocale) {
+      assert.deepEqual(markdownShape(document.content), expectedShape);
+    }
+
     if (rule.tier === "A1") {
       assert.ok(locales.includes("en"), `A1 edition ${locale} requires English in ${directory.pathname}`);
       assert.equal(document.data.source_hash, expectedHash);
-      assert.deepEqual(markdownShape(document.content), expectedShape);
     }
   }
 }
