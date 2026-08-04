@@ -1,4 +1,5 @@
 .language-trigger {
+  position: relative;
   display: grid;
   width: 2.75rem;
   height: 2.75rem;
@@ -10,10 +11,21 @@
   cursor: pointer;
   place-items: center;
   -webkit-tap-highlight-color: transparent;
-  transition: background-color 140ms ease, opacity 140ms ease;
+  transition: opacity 140ms ease;
+}
+
+.language-trigger::before {
+  position: absolute;
+  inset: 0.25rem;
+  border-radius: 50%;
+  background: transparent;
+  content: "";
+  pointer-events: none;
+  transition: background-color 140ms ease;
 }
 
 .language-trigger svg {
+  position: relative;
   width: 1.08rem;
   height: 1.08rem;
   fill: none;
@@ -23,8 +35,11 @@
   stroke-width: 1.55;
 }
 
-.language-trigger:hover,
-.language-trigger[aria-expanded="true"] {
+.language-trigger:hover::before {
+  background: color-mix(in srgb, var(--ink) 4%, transparent);
+}
+
+.language-trigger[aria-expanded="true"]::before {
   background: color-mix(in srgb, var(--ink) 6%, transparent);
 }
 
@@ -140,27 +155,7 @@
   overscroll-behavior: contain;
 }
 
-.language-group {
-  margin: 0;
-}
-
-.language-group + .language-group {
-  margin-top: 0.6rem;
-}
-
-.language-group h3 {
-  margin: 0;
-  padding: 0.55rem 0.7rem 0.3rem;
-  color: var(--muted);
-  font-family: ui-sans-serif, system-ui, sans-serif;
-  font-size: 0.7rem;
-  font-weight: 600;
-  letter-spacing: 0.06em;
-  line-height: 1.2;
-  text-transform: uppercase;
-}
-
-.language-group ul {
+.language-options {
   margin: 0;
   padding: 0;
   list-style: none;

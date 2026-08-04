@@ -109,9 +109,20 @@ export function createLanguageOptions(
       englishName: getLanguageLabel(locale, "en"),
       href: destinations[locale],
     }))
-    .sort((a, b) =>
-      a.englishName.localeCompare(b.englishName, "en", { sensitivity: "base" }),
-    );
+    .sort((a, b) => {
+      if (a.locale === currentLocale) return -1;
+      if (b.locale === currentLocale) return 1;
+
+      return (
+        a.currentName.localeCompare(b.currentName, currentLocale, {
+          sensitivity: "base",
+        }) ||
+        a.englishName.localeCompare(b.englishName, "en", {
+          sensitivity: "base",
+        }) ||
+        a.locale.localeCompare(b.locale)
+      );
+    });
 }
 
 function dateLocale(locale: string): string {

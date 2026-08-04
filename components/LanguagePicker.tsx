@@ -9,12 +9,8 @@ import {
   type MouseEvent,
 } from "react";
 import type { LanguageOption } from "@/lib/i18n/locale";
-import { findLocaleMatch } from "@/lib/i18n/locale";
 import { getUiMessages } from "@/lib/i18n/messages";
-import {
-  readRecentLanguagePreferences,
-  saveLanguagePreference,
-} from "@/lib/i18n/preferences";
+import { saveLanguagePreference } from "@/lib/i18n/preferences";
 
 interface LanguagePickerProps {
   currentLocale: string;
@@ -32,34 +28,15 @@ function normalize(value: string): string {
 export function LanguagePicker({ currentLocale, options }: LanguagePickerProps) {
   const [open, setOpen] = useState(false);
   const [query, setQuery] = useState("");
-  const [suggestedLocales, setSuggestedLocales] = useState<string[]>([
-    currentLocale,
-  ]);
   const dialogRef = useRef<HTMLDialogElement>(null);
   const searchRef = useRef<HTMLInputElement>(null);
   const copy = getUiMessages(currentLocale).languagePicker;
 
   useEffect(() => {
     if (!open || !dialogRef.current) return;
-    const available = options.map((option) => option.locale);
-    const browserMatches = (navigator.languages ?? [])
-      .map((locale) => findLocaleMatch([locale], available))
-      .filter((locale): locale is string => Boolean(locale));
-    const suggested = [
-      currentLocale,
-      ...readRecentLanguagePreferences(),
-      ...browserMatches,
-      "en",
-      "zh-Hans",
-      "ja",
-    ].filter(
-      (locale, index, items) =>
-        available.includes(locale) && items.indexOf(locale) === index,
-    );
-    setSuggestedLocales(suggested.slice(0, 5));
     dialogRef.current.showModal();
     requestAnimationFrame(() => searchRef.current?.focus());
-  }, [currentLocale, open, options]);
+  }, [open]);
 
   const filteredOptions = useMemo(() => {
     const term = normalize(query);
@@ -71,14 +48,6 @@ export function LanguagePicker({ currentLocale, options }: LanguagePickerProps) 
     );
   }, [options, query]);
 
-  const suggestedOptions = useMemo(
-    () =>
-      suggestedLocales
-        .map((locale) => options.find((option) => option.locale === locale))
-        .filter((option): option is LanguageOption => Boolean(option)),
-    [options, suggestedLocales],
-  );
-
   function close() {
     dialogRef.current?.close();
     setOpen(false);
@@ -89,7 +58,7 @@ export function LanguagePicker({ currentLocale, options }: LanguagePickerProps) 
     if (event.target === event.currentTarget) close();
   }
 
-  function renderOption(option: LanguageOption, suggested = false) {
+  function renderOption(option: LanguageOption) {
     const secondaryName =
       option.currentName !== option.nativeName ? option.currentName : option.englishName;
     const current = option.locale === currentLocale;
@@ -111,7 +80,7 @@ export function LanguagePicker({ currentLocale, options }: LanguagePickerProps) 
     );
 
     return (
-      <li key={`${suggested ? "suggested" : "all"}-${option.locale}`}>
+      <li key={option.locale}>
         {option.href ? (
           <Link
             className="language-option"
@@ -193,21 +162,13 @@ export function LanguagePicker({ currentLocale, options }: LanguagePickerProps) 
             </label>
 
             <div className="language-dialog-scroll">
-              {!query && options.length > 8 && suggestedOptions.length ? (
-                <section className="language-group">
-                  <h3>{copy.suggested}</h3>
-                  <ul>{suggestedOptions.map((option) => renderOption(option, true))}</ul>
-                </section>
-              ) : null}
-
-              <section className="language-group">
-                <h3>{copy.all}</h3>
-                {filteredOptions.length ? (
-                  <ul>{filteredOptions.map((option) => renderOption(option))}</ul>
-                ) : (
-                  <p className="language-empty">{copy.empty}</p>
-                )}
-              </section>
+              {filteredOptions.length ? (
+                <ul className="language-options">
+                  {filteredOptions.map(renderOption)}
+                </ul>
+              ) : (
+                <p className="language-empty">{copy.empty}</p>
+              )}
             </div>
           </div>
         </dialog>
