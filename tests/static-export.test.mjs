@@ -16,10 +16,12 @@ test("the static export contains English, Chinese, and Japanese editions", async
   const [
     gateway,
     legacyEssay,
+    legacyChineseOnlyEssay,
     englishHome,
     englishEssay,
     home,
     essay,
+    chineseOnlyEssay,
     japaneseHome,
     japaneseEssay,
     styles,
@@ -27,6 +29,10 @@ test("the static export contains English, Chinese, and Japanese editions", async
     readFile(new URL("out/index.html", root), "utf8"),
     readFile(
       new URL("out/essay/new-paper-and-pen-new-artists/index.html", root),
+      "utf8",
+    ),
+    readFile(
+      new URL("out/essay/jumping-into-the-next-river/index.html", root),
       "utf8",
     ),
     readFile(new URL("out/en/index.html", root), "utf8"),
@@ -37,6 +43,10 @@ test("the static export contains English, Chinese, and Japanese editions", async
     readFile(new URL("out/zh-Hans/index.html", root), "utf8"),
     readFile(
       new URL("out/zh-Hans/essay/new-paper-and-pen-new-artists/index.html", root),
+      "utf8",
+    ),
+    readFile(
+      new URL("out/zh-Hans/essay/jumping-into-the-next-river/index.html", root),
       "utf8",
     ),
     readFile(new URL("out/ja/index.html", root), "utf8"),
@@ -62,6 +72,11 @@ test("the static export contains English, Chinese, and Japanese editions", async
   assert.doesNotMatch(gateway, /class="home-content"/);
   assert.match(legacyEssay, /Selecting your language/);
   assert.match(legacyEssay, /href="\/en\/essay\/new-paper-and-pen-new-artists\/"/);
+  assert.match(legacyChineseOnlyEssay, /Selecting your language/);
+  assert.match(
+    legacyChineseOnlyEssay,
+    /href="\/zh-Hans\/essay\/jumping-into-the-next-river\/"/,
+  );
 
   assert.match(englishHome, /Liwei Wu \(吴立威\)/);
   assert.match(
@@ -97,6 +112,7 @@ test("the static export contains English, Chinese, and Japanese editions", async
   assert.doesNotMatch(home, /<h2>项目<\/h2>/);
   assert.doesNotMatch(home, /中文与英文由作者负责|Chinese and English are author-reviewed/);
   assert.match(home, /新的纸和笔，新的艺术家/);
+  assert.match(home, /跳进下一条河/);
   assert.match(home, /（2026年8月）/);
   assert.match(home, /class="theme-toggle-track"/);
   assert.match(home, /class="theme-toggle-choice theme-toggle-light"/);
@@ -111,6 +127,10 @@ test("the static export contains English, Chinese, and Japanese editions", async
   assert.match(essay, /当代码成为中间产物，谁是软件的作者？/);
   assert.match(essay, /几款尚未发布的产品/);
   assert.match(essay, /AI 的边界正在移动/);
+  assert.match(chineseOnlyEssay, /2023 年 6 月，我离开了工作近十年的/);
+  assert.match(chineseOnlyEssay, /我现在还在水里。/);
+  assert.doesNotMatch(chineseOnlyEssay, /202[4-9] 年|203[0-9] 年/);
+  assert.doesNotMatch(englishHome, /跳进下一条河/);
   assert.match(japaneseHome, /呉立威（Liwei Wu）/);
   assert.match(
     japaneseHome,

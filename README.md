@@ -68,13 +68,15 @@ content/essays/<slug>/<locale>.md
 
 例如中文原文位于 `content/essays/<slug>/zh-Hans.md`，英文和其他语言版本放在同一目录。以现有文章的 Front Matter 为模板；添加文件后重启开发服务器，使静态路由参数生效。
 
+新文章可以先只发布简体中文原文，英文审校版和 A1 译文随后逐步加入。缺失的译文不会生成文章路由，语言选择器会将对应语言标为不可用；A1 译文发布时仍须同时具备简体中文原文和英文审校版。
+
 当前发布模型只支持长篇 `essay`。未来若增加 short post，将作为独立内容类型、目录和路由设计，不预留尚未实现的 `note` 类型。
 
 ## 添加翻译
 
-译文是仓库内的普通 Markdown 内容，不依赖翻译 API、密钥或运行时翻译服务。为一个 A1 语言发布完整版本时，需要同时添加首页 `content/pages/home/<locale>.md` 和每篇文章的 `content/essays/<slug>/<locale>.md`，并按对应 A0 参考文本逐篇翻译、检查 Markdown 结构和外部链接。
+译文是仓库内的普通 Markdown 内容，不依赖翻译 API、密钥或运行时翻译服务。为一个 A1 语言发布文章版本时，需要先确保该语言的首页 `content/pages/home/<locale>.md` 已存在，再添加对应的 `content/essays/<slug>/<locale>.md`，并按 A0 参考文本逐篇翻译、检查 Markdown 结构和外部链接。
 
-A0 语言属于受保护的权威参考版本：简体中文原稿使用 `original`，人工审校后的英文使用 `author-reviewed`。A1 文件使用 `ai-translated`，并在 Front Matter 中保存参考文本的 `source_hash`；修改 A0 内容后，应重新核对所有 A1 版本并更新该值。构建和测试会检查配置中的每种语言是否同时具备完整首页、文章和界面文案。
+A0 语言属于受保护的权威参考版本：简体中文原稿使用 `original`，人工审校后的英文使用 `author-reviewed`。A1 文件使用 `ai-translated`，并在 Front Matter 中保存参考文本的 `source_hash`；修改 A0 内容后，应重新核对所有已发布的 A1 版本并更新该值。构建和测试会检查首页与界面文案完整覆盖已配置语言，并检查每篇文章已经发布的语言版本是否符合对应等级要求。
 
 翻译状态、A1 页面的 AI 翻译提示、相对链接和新增语言检查清单见 [多语言发布规范](docs/localization.md)；A0/A1 语言等级、出处和适用边界见 [翻译语言发布等级](docs/translation-language-tiers.md)。
 

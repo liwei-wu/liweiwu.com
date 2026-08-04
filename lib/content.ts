@@ -226,20 +226,10 @@ export function getHomeContent(locale: string): HomeDocument {
 
 export function getPublishedLocales(): string[] {
   const homes = getAllHomeContent();
-  const documents = getAllContent();
   assertLocaleCoverage(
     homes.map((document) => document.locale),
     "Home content",
   );
-
-  for (const id of new Set(documents.map((document) => document.id))) {
-    assertLocaleCoverage(
-      documents
-        .filter((document) => document.id === id)
-        .map((document) => document.locale),
-      `Publication ${id}`,
-    );
-  }
 
   return [...CONFIGURED_LOCALES];
 }

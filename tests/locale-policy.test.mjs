@@ -119,7 +119,46 @@ async function assertCompleteTranslationSet(directory, config) {
   }
 }
 
-test("every page and essay completely covers the configured locales", async () => {
+async function assertPublishedEssaySet(directory, config) {
+  const rules = new Map(config.locales.map((rule) => [rule.tag, rule]));
+  const filenames = (await readdir(directory))
+    .filter((filename) => filename.endsWith(".md"))
+    .sort();
+  const locales = filenames.map((filename) => filename.slice(0, -3));
+
+  assert.ok(locales.includes(config.sourceLocale), `missing source edition in ${directory.pathname}`);
+  for (const locale of locales) {
+    assert.ok(rules.has(locale), `unexpected locale ${locale} in ${directory.pathname}`);
+  }
+
+  const source = matter(
+    await readFile(new URL(`${config.sourceLocale}.md`, directory), "utf8"),
+  );
+  const expectedHash = sourceHash(source);
+  const expectedShape = markdownShape(source.content);
+
+  for (const locale of locales) {
+    const rule = rules.get(locale);
+    const document = matter(
+      await readFile(new URL(`${locale}.md`, directory), "utf8"),
+    );
+    assert.equal(document.data.locale, locale);
+    assert.equal(document.data.translation_status, rule.translationStatus);
+    assert.equal(document.data.source_locale, config.sourceLocale);
+    assert.doesNotMatch(document.content, /\p{Cf}/u);
+    assert.doesNotMatch(document.content, /\] \[entity-/);
+    assert.doesNotMatch(document.content, /\]\s+\(https?:\/\//);
+    assert.doesNotMatch(document.content, /\]\(http(?:x\.com|www\.|doi\.)/);
+
+    if (rule.tier === "A1") {
+      assert.ok(locales.includes("en"), `A1 edition ${locale} requires English in ${directory.pathname}`);
+      assert.equal(document.data.source_hash, expectedHash);
+      assert.deepEqual(markdownShape(document.content), expectedShape);
+    }
+  }
+}
+
+test("home pages cover every locale and essays may publish translations incrementally", async () => {
   const config = JSON.parse(
     await readFile(new URL("config/locales.json", root), "utf8"),
   );
@@ -133,6 +172,6 @@ test("every page and essay completely covers the configured locales", async () =
     .filter((entry) => entry.isDirectory());
   assert.ok(essayDirectories.length > 0);
   for (const entry of essayDirectories) {
-    await assertCompleteTranslationSet(new URL(`${entry.name}/`, essayRoot), config);
+    await assertPublishedEssaySet(new URL(`${entry.name}/`, essayRoot), config);
   }
 });

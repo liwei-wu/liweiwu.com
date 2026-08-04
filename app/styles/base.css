@@ -101,6 +101,12 @@ body {
   letter-spacing: -0.015em;
 }
 
+.locale-root:lang(zh) .essay-heading h1 {
+  max-width: 7em;
+  line-break: strict;
+  text-wrap: balance;
+}
+
 .locale-root:lang(ja) .site-name,
 .locale-root:lang(ja) h1,
 .locale-root:lang(ja) h2,
@@ -152,4 +158,3 @@ a:hover {
   white-space: nowrap;
   border: 0;
 }
-
