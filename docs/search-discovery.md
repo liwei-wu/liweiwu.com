@@ -14,7 +14,7 @@
 
 ## 2. 站点所有权验证
 
-在对应平台创建站点后，把平台给出的验证值写入 `.env.local`：
+在对应平台创建站点后，把平台给出的验证值设置到本地 shell、CI 或托管平台的构建环境中：
 
 ```dotenv
 GOOGLE_SITE_VERIFICATION=

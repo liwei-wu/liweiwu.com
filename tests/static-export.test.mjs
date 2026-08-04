@@ -7,6 +7,10 @@ import test from "node:test";
 
 const root = new URL("../", import.meta.url);
 const execFileAsync = promisify(execFile);
+const localeConfig = JSON.parse(
+  await readFile(new URL("config/locales.json", root), "utf8"),
+);
+const configuredLocales = localeConfig.locales.map((locale) => locale.tag);
 
 test("the static export contains English, Chinese, and Japanese editions", async () => {
   const [
@@ -160,9 +164,10 @@ test("the static export contains English, Chinese, and Japanese editions", async
   assert.match(japaneseHome, /href="\/zh-Hans\/">中国語版<\/a>/);
   assert.match(japaneseHome, /home-footer translation-notice/);
   assert.doesNotMatch(japaneseHome, /language-switcher|簡中/);
-  assert.match(japaneseEssay, /AIはソフトウェアと人間をどう変えるか/);
+  assert.match(japaneseEssay, /コードが中間生成物になるとき、ソフトウェアの作者は誰か/);
   assert.match(japaneseEssay, /未公開のプロダクトを複数つくった/);
-  assert.match(japaneseEssay, /私たちが言うAIとは何か/);
+  assert.match(japaneseEssay, /AIの境界は動いている/);
+  assert.match(japaneseEssay, /SenseTime/);
   assert.match(japaneseEssay, /AI翻訳/);
   const referenceUrls = [
     "https://x.com/karpathy/status/1886192184808149383",
@@ -193,6 +198,49 @@ test("the static export contains English, Chinese, and Japanese editions", async
   assert.doesNotMatch(englishHome, /translation-notice/);
   assert.doesNotMatch(home, /translation-notice/);
   assert.doesNotMatch(home, /codex-preview|Your site is taking shape/i);
+});
+
+test("all configured locales export complete localized editions", async () => {
+  for (const rule of localeConfig.locales) {
+    const [home, essay] = await Promise.all([
+      readFile(new URL(`out/${rule.tag}/index.html`, root), "utf8"),
+      readFile(
+        new URL(
+          `out/${rule.tag}/essay/new-paper-and-pen-new-artists/index.html`,
+          root,
+        ),
+        "utf8",
+      ),
+    ]);
+
+    assert.match(home, new RegExp(`^<!DOCTYPE html><html lang="${rule.tag}"`));
+    assert.match(essay, new RegExp(`^<!DOCTYPE html><html lang="${rule.tag}"`));
+    assert.ok(
+      home.includes(`href="https://liweiwu.com/${rule.tag}/"`),
+      `missing ${rule.tag} home canonical`,
+    );
+    assert.ok(
+      essay.includes(
+        `href="https://liweiwu.com/${rule.tag}/essay/new-paper-and-pen-new-artists/"`,
+      ),
+      `missing ${rule.tag} essay canonical`,
+    );
+
+    for (const alternate of configuredLocales) {
+      assert.ok(home.includes(`hrefLang="${alternate}"`));
+      assert.ok(essay.includes(`hrefLang="${alternate}"`));
+    }
+
+    if (rule.tier === "A1") {
+      assert.match(home, /translation-notice/);
+      assert.match(essay, /translation-notice/);
+      assert.ok(home.includes('href="/en/"'));
+      assert.ok(home.includes('href="/zh-Hans/"'));
+    } else {
+      assert.doesNotMatch(home, /translation-notice/);
+      assert.doesNotMatch(essay, /translation-notice/);
+    }
+  }
 });
 
 function getJsonLd(html) {
@@ -353,10 +401,12 @@ test("the crawl and AI discovery resources contain only production URLs", async 
     /<loc>https:\/\/liweiwu\.com\/en\/essay\/new-paper-and-pen-new-artists\/<\/loc>/,
   );
   assert.match(sitemap, /xmlns:xhtml="http:\/\/www\.w3\.org\/1999\/xhtml"/);
-  assert.match(sitemap, /hreflang="zh-Hans"/);
-  assert.match(sitemap, /hreflang="ja"/);
-  assert.match(sitemap, /<loc>https:\/\/liweiwu\.com\/ja\/<\/loc>/);
-  assert.match(sitemap, /<loc>https:\/\/liweiwu\.com\/en\/<\/loc>/);
+  for (const locale of configuredLocales) {
+    assert.ok(sitemap.includes(`hreflang="${locale}"`));
+    assert.ok(sitemap.includes(`<loc>https://liweiwu.com/${locale}/</loc>`));
+    assert.ok(llms.includes(`https://liweiwu.com/${locale}/`));
+    assert.ok(llmsFull.includes(`Language: ${locale}`));
+  }
   assert.doesNotMatch(sitemap, /<loc>https:\/\/liweiwu\.com\/languages\/<\/loc>/);
   assert.match(sitemap, /hreflang="x-default"/);
   assert.doesNotMatch(
@@ -382,7 +432,7 @@ test("the crawl and AI discovery resources contain only production URLs", async 
   assert.match(feed, /<content:encoded><!\[CDATA\[/);
   assert.match(llms, /# Liwei Wu \/ 吴立威/);
   assert.match(llms, /Full Markdown corpus/);
-  assert.match(llms, /日本語プロフィール/);
+  assert.match(llms, /呉立威/);
   assert.match(llmsFull, /Translation status: original/);
   assert.match(llmsFull, /Translation status: ai-translated/);
   assert.match(llmsFull, /Translation status: author-reviewed/);
@@ -409,9 +459,9 @@ test("indexing submissions reuse the canonical URLs from the built sitemap", asy
     },
   );
 
-  assert.match(stdout, /https:\/\/liweiwu\.com\/en\//);
-  assert.match(stdout, /https:\/\/liweiwu\.com\/zh-Hans\//);
-  assert.match(stdout, /https:\/\/liweiwu\.com\/ja\//);
+  for (const locale of configuredLocales) {
+    assert.ok(stdout.includes(`https://liweiwu.com/${locale}/`));
+  }
   assert.doesNotMatch(stdout, /https:\/\/liweiwu\.com\/languages\//);
   assert.match(
     stdout,

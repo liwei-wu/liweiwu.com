@@ -34,7 +34,7 @@ npm test
 - `/feed.xml`：全文 RSS Feed
 - `/llms.txt` 与 `/llms-full.txt`：面向 AI 工具的内容索引
 
-如需验证站点所有权，请在 `.env.local` 中填写对应平台提供的验证值，并重新构建。支持 Google、Bing、百度、360、搜狗和 Yandex。
+如需验证站点所有权，请在构建环境中设置对应平台提供的验证值，并重新构建。支持 Google、Bing、百度、360、搜狗和 Yandex。
 
 配置 `INDEXNOW_KEY` 或百度搜索资源平台提供的完整 `BAIDU_PUSH_ENDPOINT`。提交脚本直接读取 `npm run build` 生成的 `out/sitemap.xml`，因此先完成生产构建和部署，再主动提交 URL：
 
@@ -70,37 +70,11 @@ content/essays/<slug>/<locale>.md
 
 当前发布模型只支持长篇 `essay`。未来若增加 short post，将作为独立内容类型、目录和路由设计，不预留尚未实现的 `note` 类型。
 
-## 生成翻译
+## 添加翻译
 
-复制环境变量示例，填入 OpenAI API 密钥，再将变量导入当前 shell：
+译文是仓库内的普通 Markdown 内容，不依赖翻译 API、密钥或运行时翻译服务。为一个 A1 语言发布完整版本时，需要同时添加首页 `content/pages/home/<locale>.md` 和每篇文章的 `content/essays/<slug>/<locale>.md`，并按对应 A0 参考文本逐篇翻译、检查 Markdown 结构和外部链接。
 
-```bash
-cp .env.example .env.local
-# 编辑 .env.local 后执行：
-set -a
-source .env.local
-set +a
-```
-
-生成单个语言版本：
-
-```bash
-npm run translate -- --locale ja
-```
-
-强制重新生成翻译：
-
-```bash
-npm run translate -- --locale ja --force
-```
-
-确认 API 费用后，生成全部目标语言：
-
-```bash
-CONFIRM_ALL_TRANSLATIONS=1 npm run translate -- --all
-```
-
-脚本同时处理 `content/pages/` 与 `content/essays/`。译文以普通 Markdown 文件保存，并包含 `source_hash`；源文未变时会跳过生成。A0 语言属于受保护的参考版本，不会被自动翻译覆盖；简体中文原稿使用 `original`，人工审校后的英文使用 `author-reviewed`，A1 语言保留 `ai-translated` 标记。`--all` 仅生成配置中获准的 A1 目标语言。
+A0 语言属于受保护的权威参考版本：简体中文原稿使用 `original`，人工审校后的英文使用 `author-reviewed`。A1 文件使用 `ai-translated`，并在 Front Matter 中保存参考文本的 `source_hash`；修改 A0 内容后，应重新核对所有 A1 版本并更新该值。构建和测试会检查配置中的每种语言是否同时具备完整首页、文章和界面文案。
 
 翻译状态、A1 页面的 AI 翻译提示、相对链接和新增语言检查清单见 [多语言发布规范](docs/localization.md)；A0/A1 语言等级、出处和适用边界见 [翻译语言发布等级](docs/translation-language-tiers.md)。
 

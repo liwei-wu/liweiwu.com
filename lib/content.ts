@@ -1,6 +1,7 @@
 import fs from "node:fs";
 import path from "node:path";
 import matter from "gray-matter";
+import localeConfig from "@/config/locales.json";
 import { isAiTranslationLocale } from "@/lib/i18n/policy";
 
 export type TranslationStatus =
@@ -42,6 +43,26 @@ export interface HomeDocument {
 const CONTENT_ROOT = path.join(process.cwd(), "content");
 const HOME_ROOT = path.join(CONTENT_ROOT, "pages", "home");
 const ESSAYS_ROOT = path.join(CONTENT_ROOT, "essays");
+const CONFIGURED_LOCALES = localeConfig.locales.map((locale) => locale.tag);
+
+function assertLocaleCoverage(
+  actualLocales: readonly string[],
+  label: string,
+): void {
+  const actual = new Set(actualLocales);
+  const missing = CONFIGURED_LOCALES.filter((locale) => !actual.has(locale));
+  const unexpected = [...actual].filter(
+    (locale) => !CONFIGURED_LOCALES.includes(locale),
+  );
+
+  if (missing.length || unexpected.length) {
+    throw new Error(
+      `${label} locale coverage does not match config/locales.json` +
+        `${missing.length ? `; missing: ${missing.join(", ")}` : ""}` +
+        `${unexpected.length ? `; unexpected: ${unexpected.join(", ")}` : ""}`,
+    );
+  }
+}
 
 function assertString(value: unknown, field: string, file: string): string {
   if (typeof value !== "string" || !value.trim()) {
@@ -204,17 +225,23 @@ export function getHomeContent(locale: string): HomeDocument {
 }
 
 export function getPublishedLocales(): string[] {
-  const homeLocales = getAllHomeContent().map((document) => document.locale);
-  const homeLocaleSet = new Set(homeLocales);
-  const orphanedPublication = getAllContent().find(
-    (document) => !homeLocaleSet.has(document.locale),
+  const homes = getAllHomeContent();
+  const documents = getAllContent();
+  assertLocaleCoverage(
+    homes.map((document) => document.locale),
+    "Home content",
   );
-  if (orphanedPublication) {
-    throw new Error(
-      `Published locale ${orphanedPublication.locale} is missing home content`,
+
+  for (const id of new Set(documents.map((document) => document.id))) {
+    assertLocaleCoverage(
+      documents
+        .filter((document) => document.id === id)
+        .map((document) => document.locale),
+      `Publication ${id}`,
     );
   }
-  return [...new Set(homeLocales)].sort();
+
+  return [...CONFIGURED_LOCALES];
 }
 
 export function getContentByLocale(locale: string): ContentDocument[] {

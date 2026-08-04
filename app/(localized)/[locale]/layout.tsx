@@ -4,13 +4,15 @@ import "../../globals.css";
 import { DocumentShell } from "@/components/DocumentShell";
 import { getPublishedLocales } from "@/lib/content";
 import { isRtl } from "@/lib/i18n/locale";
+import { assertUiMessageCoverage } from "@/lib/i18n/messages";
 import { rootMetadata } from "@/lib/seo/metadata";
 
 export const dynamicParams = false;
 
 export function generateStaticParams() {
-  return getPublishedLocales()
-    .map((locale) => ({ locale }));
+  const locales = getPublishedLocales();
+  assertUiMessageCoverage(locales);
+  return locales.map((locale) => ({ locale }));
 }
 
 export async function generateMetadata({

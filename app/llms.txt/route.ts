@@ -1,4 +1,8 @@
-import { getAllContent, getHomeContent } from "@/lib/content";
+import {
+  getAllContent,
+  getHomeContent,
+  getPublishedLocales,
+} from "@/lib/content";
 import { contentPath, localeHomePath } from "@/lib/routes";
 import { absoluteUrl } from "@/lib/seo/site";
 import { siteConfig } from "@/site.config";
@@ -8,6 +12,12 @@ export const dynamic = "force-static";
 export function GET() {
   const documents = getAllContent();
   const englishHome = getHomeContent(siteConfig.defaultLocale);
+  const profiles = getPublishedLocales()
+    .map((locale) => {
+      const home = getHomeContent(locale);
+      return `- [${home.title}](${absoluteUrl(localeHomePath(locale))}): ${home.description} [${locale}; ${home.translationStatus}]`;
+    })
+    .join("\n");
   const publications = documents
     .map(
       (document) =>
@@ -25,9 +35,7 @@ This is the canonical personal publication of Liwei Wu. Simplified Chinese is th
 
 ## Author profiles
 
-- [English profile](${absoluteUrl(localeHomePath("en"))})
-- [简体中文主页](${absoluteUrl(localeHomePath("zh-Hans"))})
-- [日本語プロフィール](${absoluteUrl(localeHomePath("ja"))})
+${profiles}
 - [Google Scholar](${siteConfig.scholarUrl})
 - [DeepFlywheel](${siteConfig.company.url})
 
