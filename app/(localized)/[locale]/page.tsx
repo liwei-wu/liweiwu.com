@@ -1,7 +1,7 @@
 import type { Metadata } from "next";
 import { PublicationHome } from "@/components/PublicationHome";
 import { getPublishedLocales } from "@/lib/content";
-import { homeMetadata } from "@/lib/seo";
+import { homeMetadata } from "@/lib/seo/metadata";
 
 interface HomePageProps {
   params: Promise<{ locale: string }>;

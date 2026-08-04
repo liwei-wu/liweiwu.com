@@ -8,71 +8,17 @@ import {
   useState,
   type MouseEvent,
 } from "react";
-import type { LanguageOption } from "@/lib/i18n";
-import { findLocaleMatch } from "@/lib/i18n";
+import type { LanguageOption } from "@/lib/i18n/locale";
+import { findLocaleMatch } from "@/lib/i18n/locale";
+import { getUiMessages } from "@/lib/i18n/messages";
 import {
-  LANGUAGE_PREFERENCE_KEY,
-  RECENT_LANGUAGE_PREFERENCES_KEY,
-} from "@/lib/localization";
-import { LANGUAGE_DIRECTORY_PATH } from "@/lib/routes";
+  readRecentLanguagePreferences,
+  saveLanguagePreference,
+} from "@/lib/i18n/preferences";
 
 interface LanguagePickerProps {
   currentLocale: string;
   options: readonly LanguageOption[];
-}
-
-interface PickerCopy {
-  trigger: string;
-  title: string;
-  search: string;
-  suggested: string;
-  all: string;
-  unavailable: string;
-  empty: string;
-  close: string;
-  directory: string;
-}
-
-const copies: Record<string, PickerCopy> = {
-  en: {
-    trigger: "Choose language",
-    title: "Languages",
-    search: "Search languages",
-    suggested: "Suggested",
-    all: "All languages",
-    unavailable: "Not available for this page",
-    empty: "No languages found",
-    close: "Close language picker",
-    directory: "View language directory",
-  },
-  "zh-Hans": {
-    trigger: "选择语言",
-    title: "选择语言",
-    search: "搜索语言",
-    suggested: "推荐",
-    all: "所有语言",
-    unavailable: "此页面暂无该语言版本",
-    empty: "没有找到语言",
-    close: "关闭语言选择器",
-    directory: "查看语言目录",
-  },
-  ja: {
-    trigger: "言語を選択",
-    title: "言語を選択",
-    search: "言語を検索",
-    suggested: "おすすめ",
-    all: "すべての言語",
-    unavailable: "このページでは利用できません",
-    empty: "言語が見つかりません",
-    close: "言語選択を閉じる",
-    directory: "言語一覧を見る",
-  },
-};
-
-const fallbackCopy = copies.en;
-
-function pickerCopy(locale: string): PickerCopy {
-  return copies[locale] ?? copies[locale.split("-")[0]] ?? fallbackCopy;
 }
 
 function normalize(value: string): string {
@@ -83,28 +29,6 @@ function normalize(value: string): string {
     .trim();
 }
 
-function readRecentLocales(): string[] {
-  try {
-    const value = JSON.parse(
-      localStorage.getItem(RECENT_LANGUAGE_PREFERENCES_KEY) ?? "[]",
-    );
-    return Array.isArray(value) ? value.filter((item) => typeof item === "string") : [];
-  } catch {
-    return [];
-  }
-}
-
-function saveLanguagePreference(locale: string) {
-  try {
-    localStorage.setItem(LANGUAGE_PREFERENCE_KEY, locale);
-    const recent = [locale, ...readRecentLocales().filter((item) => item !== locale)];
-    localStorage.setItem(
-      RECENT_LANGUAGE_PREFERENCES_KEY,
-      JSON.stringify(recent.slice(0, 5)),
-    );
-  } catch {}
-}
-
 export function LanguagePicker({ currentLocale, options }: LanguagePickerProps) {
   const [open, setOpen] = useState(false);
   const [query, setQuery] = useState("");
@@ -113,7 +37,7 @@ export function LanguagePicker({ currentLocale, options }: LanguagePickerProps) 
   ]);
   const dialogRef = useRef<HTMLDialogElement>(null);
   const searchRef = useRef<HTMLInputElement>(null);
-  const copy = pickerCopy(currentLocale);
+  const copy = getUiMessages(currentLocale).languagePicker;
 
   useEffect(() => {
     if (!open || !dialogRef.current) return;
@@ -123,7 +47,7 @@ export function LanguagePicker({ currentLocale, options }: LanguagePickerProps) 
       .filter((locale): locale is string => Boolean(locale));
     const suggested = [
       currentLocale,
-      ...readRecentLocales(),
+      ...readRecentLanguagePreferences(),
       ...browserMatches,
       "en",
       "zh-Hans",
@@ -285,12 +209,6 @@ export function LanguagePicker({ currentLocale, options }: LanguagePickerProps) 
                 )}
               </section>
             </div>
-
-            <footer className="language-dialog-footer">
-              <Link href={LANGUAGE_DIRECTORY_PATH} onClick={close}>
-                {copy.directory}
-              </Link>
-            </footer>
           </div>
         </dialog>
       ) : null}

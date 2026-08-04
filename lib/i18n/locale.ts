@@ -1,7 +1,5 @@
-import languageConfig from "@/languages.json";
 import { DEFAULT_LOCALE } from "@/lib/routes";
 
-export const ALL_LANGUAGE_TAGS = languageConfig.languages;
 export { DEFAULT_LOCALE };
 
 const RTL_LANGUAGES = new Set([
@@ -16,6 +14,15 @@ const RTL_LANGUAGES = new Set([
   "ur",
   "yi",
 ]);
+
+export function isChineseLocale(locale: string): boolean {
+  return locale.toLowerCase().startsWith("zh");
+}
+
+export function isJapaneseLocale(locale: string): boolean {
+  const normalized = locale.toLowerCase();
+  return normalized === "ja" || normalized.startsWith("ja-");
+}
 
 export function isRtl(locale: string): boolean {
   return RTL_LANGUAGES.has(locale.split("-")[0].toLowerCase());
@@ -107,9 +114,14 @@ export function createLanguageOptions(
     );
 }
 
+function dateLocale(locale: string): string {
+  if (locale === "zh-Hans") return "zh-CN";
+  if (locale === "zh-Hant") return "zh-TW";
+  return locale;
+}
+
 export function formatDate(date: string, locale: string): string {
-  const normalizedLocale = locale === "zh-Hans" ? "zh-CN" : locale === "zh-Hant" ? "zh-TW" : locale;
-  return new Intl.DateTimeFormat(normalizedLocale, {
+  return new Intl.DateTimeFormat(dateLocale(locale), {
     year: "numeric",
     month: "long",
     day: "numeric",
@@ -118,9 +130,7 @@ export function formatDate(date: string, locale: string): string {
 }
 
 export function formatMonth(date: string, locale: string): string {
-  const normalizedLocale =
-    locale === "zh-Hans" ? "zh-CN" : locale === "zh-Hant" ? "zh-TW" : locale;
-  return new Intl.DateTimeFormat(normalizedLocale, {
+  return new Intl.DateTimeFormat(dateLocale(locale), {
     year: "numeric",
     month: "long",
     timeZone: "UTC",

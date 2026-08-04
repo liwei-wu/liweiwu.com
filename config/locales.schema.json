@@ -1,0 +1,82 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "Publication locale release configuration",
+  "type": "object",
+  "required": [
+    "policyDocument",
+    "defaultLocale",
+    "sourceLocale",
+    "locales"
+  ],
+  "additionalProperties": false,
+  "properties": {
+    "$schema": { "type": "string" },
+    "policyDocument": { "type": "string", "minLength": 1 },
+    "defaultLocale": { "$ref": "#/$defs/languageTag" },
+    "sourceLocale": { "$ref": "#/$defs/languageTag" },
+    "locales": {
+      "type": "array",
+      "minItems": 1,
+      "items": { "$ref": "#/$defs/locale" }
+    }
+  },
+  "$defs": {
+    "languageTag": {
+      "type": "string",
+      "pattern": "^[A-Za-z]{2,3}(?:-[A-Za-z0-9]{2,8})*$"
+    },
+    "locale": {
+      "type": "object",
+      "required": ["tag", "tier", "role", "translationStatus"],
+      "additionalProperties": false,
+      "properties": {
+        "tag": { "$ref": "#/$defs/languageTag" },
+        "tier": { "enum": ["A0", "A1"] },
+        "role": {
+          "enum": ["original", "author-reviewed", "ai-translation-target"]
+        },
+        "translationStatus": {
+          "enum": ["original", "author-reviewed", "ai-translated"]
+        }
+      },
+      "allOf": [
+        {
+          "if": {
+            "properties": { "role": { "const": "original" } },
+            "required": ["role"]
+          },
+          "then": {
+            "properties": {
+              "tier": { "const": "A0" },
+              "translationStatus": { "const": "original" }
+            }
+          }
+        },
+        {
+          "if": {
+            "properties": { "role": { "const": "author-reviewed" } },
+            "required": ["role"]
+          },
+          "then": {
+            "properties": {
+              "tier": { "const": "A0" },
+              "translationStatus": { "const": "author-reviewed" }
+            }
+          }
+        },
+        {
+          "if": {
+            "properties": { "tier": { "const": "A1" } },
+            "required": ["tier"]
+          },
+          "then": {
+            "properties": {
+              "role": { "const": "ai-translation-target" },
+              "translationStatus": { "const": "ai-translated" }
+            }
+          }
+        }
+      ]
+    }
+  }
+}

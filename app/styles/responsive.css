@@ -1,0 +1,103 @@
+@media (max-width: 47.99rem) {
+  :root {
+    --header-height: 5.5rem;
+  }
+
+  .site-header,
+  .home-content,
+  .essay {
+    width: min(calc(100% - 2.5rem), var(--page-width));
+  }
+
+  .site-header {
+    grid-template-columns: 1fr auto auto;
+  }
+
+  .site-name {
+    font-size: 1.72rem;
+  }
+
+  .header-side-start {
+    position: static;
+    grid-column: 2;
+    grid-row: 1;
+    margin-inline-end: 1rem;
+    z-index: 50;
+  }
+
+  .header-side-end {
+    grid-column: 3;
+    gap: 0;
+  }
+
+  .language-dialog {
+    width: 100%;
+    max-height: min(88dvh, 46rem);
+    margin: auto 0 0;
+    border-width: 1px 0 0;
+    border-radius: 0.85rem 0.85rem 0 0;
+  }
+
+  .language-dialog-panel {
+    max-height: min(88dvh, 46rem);
+  }
+
+  .has-toc .site-header {
+    grid-template-columns: auto 1fr auto;
+  }
+
+  .has-toc .site-name {
+    display: none;
+  }
+
+  .has-toc .header-side-start {
+    grid-column: 1;
+    margin-inline-end: 0;
+  }
+
+  .has-toc .header-side-end {
+    grid-column: 3;
+  }
+
+  .essay-heading {
+    margin-top: 1.75rem;
+  }
+
+  .essay-heading h1 {
+    font-size: clamp(2.55rem, 12.5vw, 3.3rem);
+    line-height: 1.04;
+  }
+
+  .essay-subtitle {
+    margin-top: 0.85rem;
+    font-size: 1.28rem;
+  }
+
+  .essay-meta {
+    margin-top: 2.2rem;
+  }
+
+  .essay-body h2 {
+    font-size: 1.75rem;
+  }
+}
+
+@media (max-width: 25rem) {
+  .header-side-start {
+    margin-inline-end: 0.55rem;
+  }
+
+  .header-side-end {
+    gap: 0;
+  }
+
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    scroll-behavior: auto !important;
+    transition-duration: 0.01ms !important;
+  }
+}

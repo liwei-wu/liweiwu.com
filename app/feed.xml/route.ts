@@ -1,6 +1,7 @@
-import { getAllContent, renderMarkdown } from "@/lib/content";
+import { getAllContent, getHomeContent } from "@/lib/content";
+import { renderMarkdown } from "@/lib/markdown";
 import { contentPath } from "@/lib/routes";
-import { absoluteUrl } from "@/lib/seo";
+import { absoluteUrl } from "@/lib/seo/site";
 import { siteConfig } from "@/site.config";
 
 export const dynamic = "force-static";
@@ -20,6 +21,7 @@ function cdata(value: string): string {
 
 export function GET() {
   const documents = getAllContent();
+  const englishHome = getHomeContent(siteConfig.defaultLocale);
   const lastModified = documents
     .map((document) => document.revisedAt ?? document.publishedAt)
     .sort()
@@ -27,9 +29,9 @@ export function GET() {
   const items = documents
     .map((document) => {
       const url = absoluteUrl(
-        contentPath(document.locale, document.type, document.slug),
+        contentPath(document.locale, document.slug),
       );
-      const { html } = renderMarkdown(document.body);
+      const { html } = renderMarkdown(document.body, document.locale);
       const categories = document.topics
         .map((topic) => `<category>${escapeXml(topic)}</category>`)
         .join("");
@@ -56,7 +58,7 @@ export function GET() {
     "<channel>",
     `<title>${escapeXml(siteConfig.siteName)}</title>`,
     `<link>${escapeXml(absoluteUrl("/"))}</link>`,
-    `<description>${escapeXml(siteConfig.description.en)}</description>`,
+    `<description>${escapeXml(englishHome.description)}</description>`,
     `<language>en</language>`,
     `<atom:link href="${escapeXml(absoluteUrl("/feed.xml"))}" rel="self" type="application/rss+xml"/>`,
     `<lastBuildDate>${new Date(`${lastModified ?? "1970-01-01"}T00:00:00Z`).toUTCString()}</lastBuildDate>`,

@@ -3,8 +3,8 @@ import { notFound } from "next/navigation";
 import "../../globals.css";
 import { DocumentShell } from "@/components/DocumentShell";
 import { getPublishedLocales } from "@/lib/content";
-import { isRtl } from "@/lib/i18n";
-import { rootMetadata } from "@/lib/seo";
+import { isRtl } from "@/lib/i18n/locale";
+import { rootMetadata } from "@/lib/seo/metadata";
 
 export const dynamicParams = false;
 

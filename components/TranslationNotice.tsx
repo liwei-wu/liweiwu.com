@@ -1,13 +1,6 @@
 import Link from "next/link";
-import { isReferenceLocale } from "@/lib/localization";
-
-interface NoticeCopy {
-  prefix: string;
-  english: string;
-  conjunction: string;
-  chinese: string;
-  suffix: string;
-}
+import { getUiMessages } from "@/lib/i18n/messages";
+import { isReferenceLocale } from "@/lib/i18n/policy";
 
 interface TranslationNoticeProps {
   locale: string;
@@ -16,24 +9,6 @@ interface TranslationNoticeProps {
   as?: "footer" | "p";
   className?: string;
 }
-
-const noticeCopies: Record<string, NoticeCopy> = {
-  ja: {
-    prefix: "日本語版はAI翻訳です。",
-    english: "英語版",
-    conjunction: "または",
-    chinese: "中国語版",
-    suffix: "をご覧ください。",
-  },
-};
-
-const fallbackCopy: NoticeCopy = {
-  prefix: "This edition is AI-translated. View the ",
-  english: "English edition",
-  conjunction: " or ",
-  chinese: "Chinese edition",
-  suffix: ".",
-};
 
 export function TranslationNotice({
   locale,
@@ -44,7 +19,7 @@ export function TranslationNotice({
 }: TranslationNoticeProps) {
   if (isReferenceLocale(locale)) return null;
 
-  const copy = noticeCopies[locale] ?? noticeCopies[locale.split("-")[0]] ?? fallbackCopy;
+  const copy = getUiMessages(locale).translationNotice;
   const Element = as;
 
   return (

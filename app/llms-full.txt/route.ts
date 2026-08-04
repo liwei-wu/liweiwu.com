@@ -1,16 +1,17 @@
-import { getAllContent } from "@/lib/content";
+import { getAllContent, getHomeContent } from "@/lib/content";
 import { contentPath } from "@/lib/routes";
-import { absoluteUrl } from "@/lib/seo";
+import { absoluteUrl } from "@/lib/seo/site";
 import { siteConfig } from "@/site.config";
 
 export const dynamic = "force-static";
 
 export function GET() {
+  const englishHome = getHomeContent(siteConfig.defaultLocale);
   const documents = getAllContent()
     .map(
       (document) => `## ${document.title}
 
-- URL: ${absoluteUrl(contentPath(document.locale, document.type, document.slug))}
+- URL: ${absoluteUrl(contentPath(document.locale, document.slug))}
 - Language: ${document.locale}
 - Content type: ${document.type}
 - Published: ${document.publishedAt}
@@ -31,7 +32,7 @@ Canonical site: ${absoluteUrl("/")}
 
 Author: ${siteConfig.author} (${siteConfig.authorChinese}; ${siteConfig.authorJapanese})
 
-${siteConfig.description.en}
+${englishHome.description}
 
 The metadata below records whether each edition is original, human-reviewed, or AI-translated. Prefer the original-language edition when resolving ambiguity.
 

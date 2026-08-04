@@ -1,0 +1,32 @@
+.redirect-page {
+  display: grid;
+  min-height: 100vh;
+  padding: 2rem;
+  text-align: center;
+  place-items: center;
+}
+
+.redirect-page p {
+  margin: 0;
+}
+
+.redirect-title {
+  font-size: 1.35rem;
+  font-weight: 650;
+}
+
+.redirect-status {
+  margin-top: 0.4rem !important;
+  color: var(--muted);
+  font-family: ui-sans-serif, system-ui, sans-serif;
+  font-size: 0.8rem;
+}
+
+.redirect-page nav {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: 0.8rem;
+  margin-top: 1.25rem;
+  font-size: 0.86rem;
+}

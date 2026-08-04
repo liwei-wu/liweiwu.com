@@ -36,15 +36,27 @@ npm test
 
 如需验证站点所有权，请在 `.env.local` 中填写对应平台提供的验证值，并重新构建。支持 Google、Bing、百度、360、搜狗和 Yandex。
 
-配置 `INDEXNOW_KEY` 或百度搜索资源平台提供的完整 `BAIDU_PUSH_ENDPOINT`，部署最新构建后主动提交 URL：
+配置 `INDEXNOW_KEY` 或百度搜索资源平台提供的完整 `BAIDU_PUSH_ENDPOINT`。提交脚本直接读取 `npm run build` 生成的 `out/sitemap.xml`，因此先完成生产构建和部署，再主动提交 URL：
 
 ```bash
 npm run submit:indexing
 ```
 
-提交前可用 `npm run submit:indexing -- --dry-run` 核对 URL 数量。验证值和百度提交地址不得提交到仓库。
+提交前可用 `npm run submit:indexing -- --dry-run` 核对 Sitemap 中的 canonical URL。脚本不会自行扫描 `content/`，从而避免内容目录结构与提交 URL 规则发生漂移。验证值和百度提交地址不得提交到仓库。
 
 上线、验证和各站长平台的操作顺序见 [搜索收录运行手册](docs/search-discovery.md)。
+
+## 首页内容
+
+各语言的首页介绍、SEO 标题和描述存放在：
+
+```text
+content/pages/home/<locale>.md
+```
+
+页面正文使用 Markdown，标题、描述和翻译状态使用 Front Matter。`site.config.ts` 只保存跨语言共用的作者、公司和外部链接等配置。
+
+公司、高校等机构链接使用 `[名称][entity-配置键]` 引用，并由 `site.config.ts` 集中提供各语言官网地址；详细规则见 [多语言发布规范](docs/localization.md#机构实体与外部链接)。
 
 ## 发布文章
 
@@ -55,6 +67,8 @@ content/essays/<slug>/<locale>.md
 ```
 
 例如中文原文位于 `content/essays/<slug>/zh-Hans.md`，英文和其他语言版本放在同一目录。以现有文章的 Front Matter 为模板；添加文件后重启开发服务器，使静态路由参数生效。
+
+当前发布模型只支持长篇 `essay`。未来若增加 short post，将作为独立内容类型、目录和路由设计，不预留尚未实现的 `note` 类型。
 
 ## 生成翻译
 
@@ -71,13 +85,13 @@ set +a
 生成单个语言版本：
 
 ```bash
-npm run translate -- --locale en
+npm run translate -- --locale ja
 ```
 
 强制重新生成翻译：
 
 ```bash
-npm run translate -- --locale en --force
+npm run translate -- --locale ja --force
 ```
 
 确认 API 费用后，生成全部目标语言：
@@ -86,14 +100,14 @@ npm run translate -- --locale en --force
 CONFIRM_ALL_TRANSLATIONS=1 npm run translate -- --all
 ```
 
-译文以普通 Markdown 文件保存，并包含 `source_hash`；源文未变时会跳过生成。简体中文原稿使用 `original`，人工审校后的译文使用 `author-reviewed`，未经审校的译文保留 `ai-translated` 标记。
+脚本同时处理 `content/pages/` 与 `content/essays/`。译文以普通 Markdown 文件保存，并包含 `source_hash`；源文未变时会跳过生成。A0 语言属于受保护的参考版本，不会被自动翻译覆盖；简体中文原稿使用 `original`，人工审校后的英文使用 `author-reviewed`，A1 语言保留 `ai-translated` 标记。`--all` 仅生成配置中获准的 A1 目标语言。
 
-翻译状态、非中英文页面的页底提示、相对链接和新增语言检查清单见 [多语言发布规范](docs/localization.md)。
+翻译状态、A1 页面的 AI 翻译提示、相对链接和新增语言检查清单见 [多语言发布规范](docs/localization.md)；A0/A1 语言等级、出处和适用边界见 [翻译语言发布等级](docs/translation-language-tiers.md)。
 
 ## 语言规则
 
-`languages.json` 包含 185 个语言标签：采用现行 ISO 639 Set 1 列表，并以 `zh-Hans` 和 `zh-Hant` 取代 `zh`。地区变体会匹配相应的基础语言，例如 `zh-Hant-HK` 和 `zh-Hant-TW` 均匹配 `zh-Hant`。
+`config/locales.json` 是机器可读的语言发布配置，当前定义 2 个 A0 权威参考语言和 12 个 A1 AI 翻译候选语言。ISO 语言代码全集不再作为翻译目标清单；新增语言必须先确定发布等级、翻译状态和审校要求。地区变体会匹配相应的基础语言，例如 `zh-Hant-HK` 和 `zh-Hant-TW` 均匹配 `zh-Hant`。
 
 所有正式内容都使用显式语言前缀，例如 `/en/`、`/zh-Hans/`、`/ja/` 和 `/en/essay/<slug>/`。`/` 是自动语言入口，不承载正式英文版本；历史无前缀文章路径仅作为不收录的兼容跳转入口。
 
-顶部使用无文字的地球图标打开可搜索语言选择器。选择器只列出已经发布的语言，并按当前页面跳转到对应译文；完整的可抓取语言目录位于 `/languages/`。非中英文页面底部提供同页 `/en/` 英文版和 `/zh-Hans/` 中文版链接。完整规则见 [多语言发布规范](docs/localization.md)。
+顶部使用无文字的地球图标打开可搜索语言选择器。选择器只列出已经发布的语言，并按当前页面跳转到对应译文；搜索引擎通过各页面的 `hreflang` 与 Sitemap 发现语言版本，不再提供重复的 `/languages/` 目录页。A1 页面底部提供同页 `/en/` 英文版和 `/zh-Hans/` 简体中文版链接。完整规则见 [多语言发布规范](docs/localization.md)。

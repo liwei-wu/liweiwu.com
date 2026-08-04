@@ -1,13 +1,15 @@
 import type { MetadataRoute } from "next";
+import { getHomeContent } from "@/lib/content";
 import { siteConfig } from "@/site.config";
 
 export const dynamic = "force-static";
 
 export default function manifest(): MetadataRoute.Manifest {
+  const englishHome = getHomeContent(siteConfig.defaultLocale);
   return {
     name: siteConfig.siteName,
     short_name: siteConfig.author,
-    description: siteConfig.description.en,
+    description: englishHome.description,
     start_url: "/",
     display: "standalone",
     background_color: "#f0eee6",

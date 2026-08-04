@@ -1,6 +1,5 @@
-import { readdir, readFile } from "node:fs/promises";
+import { readFile } from "node:fs/promises";
 import path from "node:path";
-import matter from "gray-matter";
 
 const root = process.cwd();
 const siteUrl = (process.env.NEXT_PUBLIC_SITE_URL ?? "https://liweiwu.com").replace(
@@ -10,29 +9,34 @@ const siteUrl = (process.env.NEXT_PUBLIC_SITE_URL ?? "https://liweiwu.com").repl
 const dryRun = process.argv.includes("--dry-run");
 
 async function canonicalUrls() {
-  const contentRoot = path.join(root, "content");
-  const localeEntries = await readdir(contentRoot, { withFileTypes: true });
-  const locales = localeEntries
-    .filter((entry) => entry.isDirectory())
-    .map((entry) => entry.name)
-    .sort();
-  const urls = locales.map((locale) => `${siteUrl}/${locale}/`);
-
-  for (const locale of locales) {
-    const localeDirectory = path.join(contentRoot, locale);
-    const typeEntries = await readdir(localeDirectory, { withFileTypes: true });
-    for (const typeEntry of typeEntries) {
-      if (!typeEntry.isDirectory()) continue;
-      const type = typeEntry.name.replace(/s$/, "");
-      const directory = path.join(localeDirectory, typeEntry.name);
-      const files = (await readdir(directory)).filter((file) => file.endsWith(".md"));
-      for (const file of files) {
-        const { data } = matter(await readFile(path.join(directory, file), "utf8"));
-        urls.push(`${siteUrl}/${locale}/${type}/${data.slug}/`);
-      }
+  const sitemapPath = path.join(root, "out", "sitemap.xml");
+  let sitemap;
+  try {
+    sitemap = await readFile(sitemapPath, "utf8");
+  } catch (error) {
+    if (error?.code === "ENOENT") {
+      throw new Error("Missing out/sitemap.xml. Run npm run build before submitting URLs.");
     }
+    throw error;
   }
 
+  const expectedOrigin = new URL(siteUrl).origin;
+  const urls = [...sitemap.matchAll(/<loc>([^<]+)<\/loc>/g)].map((match) =>
+    match[1]
+      .replace(/&amp;/g, "&")
+      .replace(/&lt;/g, "<")
+      .replace(/&gt;/g, ">")
+      .replace(/&quot;/g, '"')
+      .replace(/&apos;/g, "'"),
+  );
+  if (!urls.length) throw new Error(`No canonical URLs found in ${sitemapPath}.`);
+  for (const url of urls) {
+    if (new URL(url).origin !== expectedOrigin) {
+      throw new Error(
+        `Sitemap URL origin does not match NEXT_PUBLIC_SITE_URL: ${url}`,
+      );
+    }
+  }
   return [...new Set(urls)].sort();
 }
 

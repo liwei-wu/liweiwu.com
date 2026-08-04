@@ -1,6 +1,7 @@
 "use client";
 
 import { useLayoutEffect, useState } from "react";
+import { getUiMessages } from "@/lib/i18n/messages";
 
 const STORAGE_KEY = "liweiwu.com-color-mode";
 type ColorMode = "light" | "dark";
@@ -16,8 +17,7 @@ function savedColorMode(): ColorMode | null {
 
 export function ThemeToggle({ locale }: { locale: string }) {
   const [mode, setMode] = useState<ColorMode | null>(null);
-  const chinese = locale.startsWith("zh");
-  const japanese = locale === "ja";
+  const copy = getUiMessages(locale).theme;
 
   useLayoutEffect(() => {
     const systemPreference = window.matchMedia("(prefers-color-scheme: dark)");
@@ -63,22 +63,10 @@ export function ThemeToggle({ locale }: { locale: string }) {
 
   const label =
     mode === null
-      ? chinese
-        ? "切换深浅色模式"
-        : japanese
-          ? "表示テーマを切り替える"
-          : "Switch color mode"
+      ? copy.switchMode
       : mode === "dark"
-        ? chinese
-          ? "切换到浅色模式"
-          : japanese
-            ? "ライトモードに切り替える"
-            : "Switch to light mode"
-        : chinese
-          ? "切换到深色模式"
-          : japanese
-            ? "ダークモードに切り替える"
-            : "Switch to dark mode";
+        ? copy.switchToLight
+        : copy.switchToDark;
 
   return (
     <button

@@ -9,12 +9,18 @@ import {
   getContent,
   getPublishedLocales,
   getTranslations,
-  renderMarkdown,
 } from "@/lib/content";
-import { createLanguageOptions, formatDate } from "@/lib/i18n";
-import { isReferenceLocale } from "@/lib/localization";
+import {
+  createLanguageOptions,
+  formatDate,
+  isChineseLocale,
+  isJapaneseLocale,
+} from "@/lib/i18n/locale";
+import { getUiMessages } from "@/lib/i18n/messages";
+import { isReferenceLocale } from "@/lib/i18n/policy";
+import { renderMarkdown } from "@/lib/markdown";
 import { contentPath, localeHomePath } from "@/lib/routes";
-import { contentStructuredData } from "@/lib/seo";
+import { contentStructuredData } from "@/lib/seo/structured-data";
 import { siteConfig } from "@/site.config";
 
 interface EssayViewProps {
@@ -23,15 +29,15 @@ interface EssayViewProps {
 }
 
 export function EssayView({ locale, slug }: EssayViewProps) {
-  const essay = getContent(locale, "essay", slug);
+  const essay = getContent(locale, slug);
   if (!essay) notFound();
 
-  const { html, toc } = renderMarkdown(essay.body);
+  const { html, toc } = renderMarkdown(essay.body, essay.locale);
   const translations = getTranslations(essay.id);
   const localeDestinations = Object.fromEntries(
     translations.map((translation) => [
       translation.locale,
-      contentPath(translation.locale, translation.type, translation.slug),
+      contentPath(translation.locale, translation.slug),
     ]),
   );
   const languageOptions = createLanguageOptions(
@@ -42,16 +48,17 @@ export function EssayView({ locale, slug }: EssayViewProps) {
   const englishEdition = translations.find(
     (translation) => translation.locale === "en",
   );
-  const chineseEdition = translations.find((translation) =>
-    translation.locale.startsWith("zh"),
+  const chineseEdition = translations.find(
+    (translation) => translation.locale === "zh-Hans",
   );
   if (!isReferenceLocale(locale) && (!englishEdition || !chineseEdition)) {
     throw new Error(
       `Non-reference edition ${locale}/${essay.slug} requires English and Chinese counterparts.`,
     );
   }
-  const chinese = locale.startsWith("zh");
-  const japanese = locale === "ja";
+  const chinese = isChineseLocale(locale);
+  const japanese = isJapaneseLocale(locale);
+  const copy = getUiMessages(locale);
   const author = chinese
     ? siteConfig.authorChinese
     : japanese
@@ -65,7 +72,7 @@ export function EssayView({ locale, slug }: EssayViewProps) {
       currentLocale={locale}
       languageOptions={languageOptions}
       toc={toc}
-      contentsLabel={chinese ? "目录" : japanese ? "目次" : "Contents"}
+      contentsLabel={copy.navigation.contents}
     >
       <JsonLd data={contentStructuredData(essay, translations)} />
       <main className="essay-main">
@@ -83,11 +90,7 @@ export function EssayView({ locale, slug }: EssayViewProps) {
               </time>
               <span aria-hidden="true"> · </span>
               <span>
-                {chinese
-                  ? `${essay.readingMinutes} 分钟`
-                  : japanese
-                    ? `${essay.readingMinutes}分`
-                    : `${essay.readingMinutes} min`}
+                {copy.essay.readingMinutes(essay.readingMinutes)}
               </span>
             </p>
           </header>
@@ -100,35 +103,19 @@ export function EssayView({ locale, slug }: EssayViewProps) {
           <footer className="essay-footer">
             <p>
               {essay.revisedAt && essay.revisedAt !== essay.publishedAt
-                ? chinese
-                  ? `修订于 ${formatDate(essay.revisedAt, locale)}`
-                  : japanese
-                    ? `${formatDate(essay.revisedAt, locale)}改訂`
-                    : `Revised ${formatDate(essay.revisedAt, locale)}`
-                : chinese
-                  ? `首次发表于 ${formatDate(essay.publishedAt, locale)}`
-                  : japanese
-                    ? `${formatDate(essay.publishedAt, locale)}初出`
-                    : `First published ${formatDate(essay.publishedAt, locale)}`}
+                ? copy.essay.revised(formatDate(essay.revisedAt, locale))
+                : copy.essay.firstPublished(formatDate(essay.publishedAt, locale))}
             </p>
             <TranslationNotice
               locale={locale}
               englishHref={
                 englishEdition
-                  ? contentPath(
-                      englishEdition.locale,
-                      englishEdition.type,
-                      englishEdition.slug,
-                    )
+                  ? contentPath(englishEdition.locale, englishEdition.slug)
                   : localeHomePath("en")
               }
               chineseHref={
                 chineseEdition
-                  ? contentPath(
-                      chineseEdition.locale,
-                      chineseEdition.type,
-                      chineseEdition.slug,
-                    )
+                  ? contentPath(chineseEdition.locale, chineseEdition.slug)
                   : localeHomePath("zh-Hans")
               }
               className="translation-notice"

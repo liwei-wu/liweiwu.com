@@ -1,20 +1,12 @@
 import assert from "node:assert/strict";
+import { execFile } from "node:child_process";
 import { readFile } from "node:fs/promises";
+import { fileURLToPath } from "node:url";
+import { promisify } from "node:util";
 import test from "node:test";
 
 const root = new URL("../", import.meta.url);
-
-test("the global language configuration contains 185 unique tags", async () => {
-  const config = JSON.parse(
-    await readFile(new URL("languages.json", root), "utf8"),
-  );
-  assert.equal(config.languages.length, 185);
-  assert.equal(new Set(config.languages).size, 185);
-  assert.ok(config.languages.includes("zh-Hans"));
-  assert.ok(config.languages.includes("zh-Hant"));
-  assert.ok(config.languages.includes("ja"));
-  assert.ok(!config.languages.includes("zh"));
-});
+const execFileAsync = promisify(execFile);
 
 test("the static export contains English, Chinese, and Japanese editions", async () => {
   const [
@@ -26,7 +18,6 @@ test("the static export contains English, Chinese, and Japanese editions", async
     essay,
     japaneseHome,
     japaneseEssay,
-    languages,
     styles,
   ] = await Promise.all([
     readFile(new URL("out/index.html", root), "utf8"),
@@ -49,29 +40,53 @@ test("the static export contains English, Chinese, and Japanese editions", async
       new URL("out/ja/essay/new-paper-and-pen-new-artists/index.html", root),
       "utf8",
     ),
-    readFile(new URL("out/languages/index.html", root), "utf8"),
-    readFile(new URL("app/globals.css", root), "utf8"),
+    Promise.all(
+      [
+        "app/styles/base.css",
+        "app/styles/site-shell.css",
+        "app/styles/language-controls.css",
+        "app/styles/publication.css",
+        "app/styles/language-gateway.css",
+        "app/styles/responsive.css",
+      ].map((file) => readFile(new URL(file, root), "utf8")),
+    ).then((stylesheets) => stylesheets.join("\n")),
   ]);
 
   assert.match(gateway, /Selecting your language/);
   assert.match(gateway, /href="\/en\/"/);
   assert.match(gateway, /href="\/ja\/"/);
-  assert.doesNotMatch(gateway, /Director of R&amp;D at SenseTime/);
+  assert.doesNotMatch(gateway, /class="home-content"/);
   assert.match(legacyEssay, /Selecting your language/);
   assert.match(legacyEssay, /href="\/en\/essay\/new-paper-and-pen-new-artists\/"/);
 
   assert.match(englishHome, /Liwei Wu \(吴立威\)/);
-  assert.match(englishHome, /Director of R&amp;D at SenseTime/);
-  assert.match(englishHome, /bachelor(?:&apos;|&#x27;|')s degree from Nanjing University/);
+  assert.match(
+    englishHome,
+    /Director of R&amp;D at <a href="https:\/\/www\.sensetime\.com\/en\/">SenseTime<\/a>/,
+  );
+  assert.match(
+    englishHome,
+    /bachelor(?:&apos;|&#x27;|&#39;|')s degree from <a href="https:\/\/www\.nju\.edu\.cn\/en\/">Nanjing University<\/a>/,
+  );
   assert.match(englishHome, /New Paper and Pen, New Artists/);
   assert.match(englishHome, /August 2026/);
-  assert.match(englishEssay, /How AI Changes Software and People/);
+  assert.match(
+    englishEssay,
+    /When Code Becomes an Intermediate Artifact, Who Authors the Software\?/,
+  );
+  assert.match(englishEssay, /several unreleased products/);
   assert.match(englishEssay, /Code Is Becoming an Intermediate Artifact/);
   assert.doesNotMatch(englishEssay, /translation-notice|AI translation/);
 
   assert.match(home, /吴立威（Liwei Wu）/);
-  assert.match(home, /商汤科技研发总监/);
-  assert.match(home, /本科毕业于南京大学，后获清华大学硕士学位/);
+  assert.match(
+    home,
+    /<a href="https:\/\/www\.sensetime\.com\/cn\/index">商汤科技<\/a>研发总监/,
+  );
+  assert.match(
+    home,
+    /本科毕业于<a href="https:\/\/www\.nju\.edu\.cn\/">南京大学<\/a>，后获<a href="https:\/\/www\.tsinghua\.edu\.cn\/">清华大学<\/a>硕士学位/,
+  );
   assert.match(home, /scholar\.google\.com\/citations\?user=dg1JyaUAAAAJ/);
   assert.match(home, /https:\/\/deepflywheel\.com\//);
   assert.doesNotMatch(home, /AI 应用与软件创作实践/);
@@ -89,10 +104,55 @@ test("the static export contains English, Chinese, and Japanese editions", async
   assert.match(styles, /@media \(prefers-color-scheme: dark\)/);
   assert.match(styles, /:root:not\(\[data-theme\]\)/);
   assert.doesNotMatch(home, /2026年8月3日/);
-  assert.match(essay, /AI 如何改变软件与人/);
-  assert.match(essay, /我们所说的 AI，究竟是什么/);
+  assert.match(essay, /当代码成为中间产物，谁是软件的作者？/);
+  assert.match(essay, /几款尚未发布的产品/);
+  assert.match(essay, /AI 的边界正在移动/);
   assert.match(japaneseHome, /呉立威（Liwei Wu）/);
-  assert.match(japaneseHome, /SenseTimeの研究開発ディレクター/);
+  assert.match(
+    japaneseHome,
+    /<a href="https:\/\/www\.sensetime\.com\/en\/">SenseTime<\/a>の研究開発ディレクター/,
+  );
+  assert.match(
+    japaneseHome,
+    /<a href="https:\/\/www\.nju\.edu\.cn\/en\/">南京大学<\/a>を卒業後、<a href="https:\/\/www\.tsinghua\.edu\.cn\/en\/">清華大学<\/a>で修士号を取得/,
+  );
+  for (const [page, entityUrls] of [
+    [
+      englishHome,
+      [
+        "https://deepflywheel.com/",
+        "https://www.sensetime.com/en/",
+        "https://www.nju.edu.cn/en/",
+        "https://www.tsinghua.edu.cn/en/",
+      ],
+    ],
+    [
+      home,
+      [
+        "https://deepflywheel.com/",
+        "https://www.sensetime.com/cn/index",
+        "https://www.nju.edu.cn/",
+        "https://www.tsinghua.edu.cn/",
+      ],
+    ],
+    [
+      japaneseHome,
+      [
+        "https://deepflywheel.com/",
+        "https://www.sensetime.com/en/",
+        "https://www.nju.edu.cn/en/",
+        "https://www.tsinghua.edu.cn/en/",
+      ],
+    ],
+  ]) {
+    for (const entityUrl of entityUrls) {
+      assert.equal(
+        page.split(`href="${entityUrl}"`).length - 1,
+        1,
+        `expected exactly one visible entity link to ${entityUrl}`,
+      );
+    }
+  }
   assert.match(japaneseHome, /新しい紙とペン、新しい芸術家/);
   assert.match(japaneseHome, /（2026年8月）/);
   assert.match(japaneseHome, /日本語版はAI翻訳です/);
@@ -101,7 +161,8 @@ test("the static export contains English, Chinese, and Japanese editions", async
   assert.match(japaneseHome, /home-footer translation-notice/);
   assert.doesNotMatch(japaneseHome, /language-switcher|簡中/);
   assert.match(japaneseEssay, /AIはソフトウェアと人間をどう変えるか/);
-  assert.match(japaneseEssay, /私たちが言うAIとは、いったい何か/);
+  assert.match(japaneseEssay, /未公開のプロダクトを複数つくった/);
+  assert.match(japaneseEssay, /私たちが言うAIとは何か/);
   assert.match(japaneseEssay, /AI翻訳/);
   const referenceUrls = [
     "https://x.com/karpathy/status/1886192184808149383",
@@ -132,10 +193,6 @@ test("the static export contains English, Chinese, and Japanese editions", async
   assert.doesNotMatch(englishHome, /translation-notice/);
   assert.doesNotMatch(home, /translation-notice/);
   assert.doesNotMatch(home, /codex-preview|Your site is taking shape/i);
-  assert.match(languages, /class="language-directory"/);
-  assert.match(languages, /hrefLang="en" href="\/en\/"/);
-  assert.match(languages, /hrefLang="ja" href="\/ja\/"/);
-  assert.match(languages, /hrefLang="zh-Hans" href="\/zh-Hans\/"/);
 });
 
 function getJsonLd(html) {
@@ -300,7 +357,7 @@ test("the crawl and AI discovery resources contain only production URLs", async 
   assert.match(sitemap, /hreflang="ja"/);
   assert.match(sitemap, /<loc>https:\/\/liweiwu\.com\/ja\/<\/loc>/);
   assert.match(sitemap, /<loc>https:\/\/liweiwu\.com\/en\/<\/loc>/);
-  assert.match(sitemap, /<loc>https:\/\/liweiwu\.com\/languages\/<\/loc>/);
+  assert.doesNotMatch(sitemap, /<loc>https:\/\/liweiwu\.com\/languages\/<\/loc>/);
   assert.match(sitemap, /hreflang="x-default"/);
   assert.doesNotMatch(
     sitemap,
@@ -336,4 +393,29 @@ test("the crawl and AI discovery resources contain only production URLs", async 
   for (const resource of [sitemap, robots, feed, llms, llmsFull]) {
     assert.doesNotMatch(resource, /http:\/\/localhost:3000/);
   }
+});
+
+test("indexing submissions reuse the canonical URLs from the built sitemap", async () => {
+  const { stdout } = await execFileAsync(
+    process.execPath,
+    [fileURLToPath(new URL("scripts/submit-indexing.mjs", root)), "--dry-run"],
+    {
+      cwd: fileURLToPath(root),
+      env: {
+        ...process.env,
+        INDEXNOW_KEY: "",
+        BAIDU_PUSH_ENDPOINT: "",
+      },
+    },
+  );
+
+  assert.match(stdout, /https:\/\/liweiwu\.com\/en\//);
+  assert.match(stdout, /https:\/\/liweiwu\.com\/zh-Hans\//);
+  assert.match(stdout, /https:\/\/liweiwu\.com\/ja\//);
+  assert.doesNotMatch(stdout, /https:\/\/liweiwu\.com\/languages\//);
+  assert.match(
+    stdout,
+    /https:\/\/liweiwu\.com\/en\/essay\/new-paper-and-pen-new-artists\//,
+  );
+  assert.doesNotMatch(stdout, /liweiwu\.com\/(?:essays|pages)\//);
 });

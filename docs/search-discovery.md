@@ -61,9 +61,12 @@ https://liweiwu.com/llms-full.txt
 先构建并部署。部署会公开 `/indexnow-key.txt`，脚本会在提交前核对线上密钥。然后运行：
 
 ```bash
+npm run build
 npm run submit:indexing -- --dry-run
 npm run submit:indexing
 ```
+
+提交脚本读取 `out/sitemap.xml`，不另行遍历内容目录。dry-run 中的 URL 应与构建产物 Sitemap 的 `<loc>` 完全一致。
 
 脚本只提交带显式语言前缀的规范 URL，不提交根语言入口、历史无前缀跳转、重复 URL 或抓取辅助文件。
 
@@ -75,6 +78,7 @@ npm run submit:indexing
 4. 检查页面源代码中的 Canonical、`hreflang`、标题、描述、Open Graph 和 JSON-LD，而不是只检查浏览器运行后的 DOM。
 5. 确认 WAF 对 `Googlebot`、`Bingbot`、`Baiduspider`、`OAI-SearchBot` 和 `PerplexityBot` 不返回 403 或 JavaScript 挑战。
 6. 每次发布或修订文章后重新构建站点，并运行主动提交脚本。
+7. 检查人物简介中的公司和高校名称只在首次出现时链接，且指向 `site.config.ts` 集中配置的第一方官网；中文内容使用中文官网，其他语言默认使用英文官网。
 
 ## 6. 持续监测
 

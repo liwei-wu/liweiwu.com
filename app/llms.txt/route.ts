@@ -1,24 +1,25 @@
-import { getAllContent } from "@/lib/content";
+import { getAllContent, getHomeContent } from "@/lib/content";
 import { contentPath, localeHomePath } from "@/lib/routes";
-import { absoluteUrl } from "@/lib/seo";
+import { absoluteUrl } from "@/lib/seo/site";
 import { siteConfig } from "@/site.config";
 
 export const dynamic = "force-static";
 
 export function GET() {
   const documents = getAllContent();
+  const englishHome = getHomeContent(siteConfig.defaultLocale);
   const publications = documents
     .map(
       (document) =>
         `- [${document.title}](${absoluteUrl(
-          contentPath(document.locale, document.type, document.slug),
+          contentPath(document.locale, document.slug),
         )}): ${document.description} [${document.locale}; ${document.translationStatus}]`,
     )
     .join("\n");
 
   const body = `# Liwei Wu / 吴立威 / 呉立威
 
-> Liwei Wu (吴立威) is an AI application entrepreneur, founder of DeepFlywheel, former SenseTime R&D director, and writer on AI, software, and authorship.
+> ${englishHome.description}
 
 This is the canonical personal publication of Liwei Wu. Simplified Chinese is the source language for current essays. Every translated page states its language and review status.
 

@@ -1,0 +1,128 @@
+.locale-root,
+.site-shell {
+  min-height: 100vh;
+}
+
+.site-header {
+  position: relative;
+  z-index: 50;
+  display: grid;
+  grid-template-columns: 1fr auto;
+  align-items: center;
+  width: min(calc(100% - 2.5rem), var(--page-width));
+  height: var(--header-height);
+  margin: 0 auto;
+}
+
+.site-name {
+  grid-column: 1;
+  justify-self: start;
+  font-size: 1.8rem;
+  font-weight: 650;
+  line-height: 1;
+  text-decoration: none;
+  letter-spacing: -0.025em;
+}
+
+.header-side {
+  display: flex;
+  align-items: center;
+}
+
+.header-side-start {
+  position: fixed;
+  top: 1.55rem;
+  left: 1.5rem;
+  z-index: 50;
+}
+
+.header-side-end {
+  grid-column: 2;
+  gap: 0.2rem;
+  justify-self: end;
+}
+
+.menu-toggle {
+  position: relative;
+  z-index: 60;
+  display: grid;
+  width: 1.35rem;
+  height: 1.35rem;
+  border: 0;
+  padding: 0;
+  background: transparent;
+  cursor: pointer;
+  place-content: center;
+}
+
+.menu-toggle span {
+  display: block;
+  width: 1.2rem;
+  height: 1px;
+  margin: 0.13rem 0;
+  background: var(--ink);
+  transition: transform 160ms ease, opacity 160ms ease;
+}
+
+.menu-is-open .menu-toggle span:nth-child(1) {
+  transform: translateY(0.27rem) rotate(45deg);
+}
+
+.menu-is-open .menu-toggle span:nth-child(2) {
+  opacity: 0;
+}
+
+.menu-is-open .menu-toggle span:nth-child(3) {
+  transform: translateY(-0.27rem) rotate(-45deg);
+}
+
+.contents-panel {
+  position: fixed;
+  inset: 0 auto 0 0;
+  z-index: 40;
+  width: min(23rem, 100vw);
+  padding: 8.125rem 1.5625rem 2rem;
+  overflow-y: auto;
+  background: var(--paper);
+  transform: translateX(-102%);
+  visibility: hidden;
+  transition: transform 180ms ease, visibility 180ms ease;
+}
+
+.menu-is-open .contents-panel {
+  transform: translateX(0);
+  visibility: visible;
+}
+
+.contents-panel h2 {
+  margin: 0 0 1.05rem;
+  font-size: 1.5rem;
+  line-height: 1.2;
+}
+
+.contents-panel ol {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.contents-panel li {
+  margin: 0 0 0.25rem;
+  line-height: 1.6;
+}
+
+.contents-panel .toc-level-3 {
+  padding-inline-start: 0.9rem;
+  font-size: 0.94em;
+}
+
+.contents-panel a {
+  color: var(--muted);
+  text-decoration: none;
+}
+
+.contents-panel a[aria-current="location"],
+.contents-panel a:hover {
+  color: var(--ink);
+}
+

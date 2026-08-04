@@ -1,0 +1,92 @@
+{
+  "$schema": "./locales.schema.json",
+  "policyDocument": "../docs/translation-language-tiers.md",
+  "defaultLocale": "en",
+  "sourceLocale": "zh-Hans",
+  "locales": [
+    {
+      "tag": "zh-Hans",
+      "tier": "A0",
+      "role": "original",
+      "translationStatus": "original"
+    },
+    {
+      "tag": "en",
+      "tier": "A0",
+      "role": "author-reviewed",
+      "translationStatus": "author-reviewed"
+    },
+    {
+      "tag": "zh-Hant",
+      "tier": "A1",
+      "role": "ai-translation-target",
+      "translationStatus": "ai-translated"
+    },
+    {
+      "tag": "es",
+      "tier": "A1",
+      "role": "ai-translation-target",
+      "translationStatus": "ai-translated"
+    },
+    {
+      "tag": "pt",
+      "tier": "A1",
+      "role": "ai-translation-target",
+      "translationStatus": "ai-translated"
+    },
+    {
+      "tag": "fr",
+      "tier": "A1",
+      "role": "ai-translation-target",
+      "translationStatus": "ai-translated"
+    },
+    {
+      "tag": "ja",
+      "tier": "A1",
+      "role": "ai-translation-target",
+      "translationStatus": "ai-translated"
+    },
+    {
+      "tag": "ru",
+      "tier": "A1",
+      "role": "ai-translation-target",
+      "translationStatus": "ai-translated"
+    },
+    {
+      "tag": "de",
+      "tier": "A1",
+      "role": "ai-translation-target",
+      "translationStatus": "ai-translated"
+    },
+    {
+      "tag": "ko",
+      "tier": "A1",
+      "role": "ai-translation-target",
+      "translationStatus": "ai-translated"
+    },
+    {
+      "tag": "hi",
+      "tier": "A1",
+      "role": "ai-translation-target",
+      "translationStatus": "ai-translated"
+    },
+    {
+      "tag": "id",
+      "tier": "A1",
+      "role": "ai-translation-target",
+      "translationStatus": "ai-translated"
+    },
+    {
+      "tag": "vi",
+      "tier": "A1",
+      "role": "ai-translation-target",
+      "translationStatus": "ai-translated"
+    },
+    {
+      "tag": "it",
+      "tier": "A1",
+      "role": "ai-translation-target",
+      "translationStatus": "ai-translated"
+    }
+  ]
+}

@@ -1,12 +1,11 @@
 import type { MetadataRoute } from "next";
 import { getAllContent, getPublishedLocales, getTranslations } from "@/lib/content";
 import {
-  LANGUAGE_DIRECTORY_PATH,
   LANGUAGE_GATEWAY_PATH,
   contentPath,
   localeHomePath,
 } from "@/lib/routes";
-import { absoluteUrl } from "@/lib/seo";
+import { absoluteUrl } from "@/lib/seo/site";
 import { siteConfig } from "@/site.config";
 
 export const dynamic = "force-static";
@@ -45,36 +44,24 @@ export default function sitemap(): MetadataRoute.Sitemap {
       translations.map((translation) => [
         translation.locale,
         absoluteUrl(
-          contentPath(translation.locale, translation.type, translation.slug),
+          contentPath(translation.locale, translation.slug),
         ),
       ]),
     );
     languages["x-default"] = absoluteUrl(
-      contentPath(
-        defaultTranslation.locale,
-        defaultTranslation.type,
-        defaultTranslation.slug,
-      ),
+      contentPath(defaultTranslation.locale, defaultTranslation.slug),
     );
 
     return {
       url: absoluteUrl(
-        contentPath(document.locale, document.type, document.slug),
+        contentPath(document.locale, document.slug),
       ),
       lastModified: document.revisedAt ?? document.publishedAt,
       changeFrequency: "yearly" as const,
-      priority: document.type === "essay" ? 1 : 0.6,
+      priority: 1,
       alternates: { languages },
     };
   });
 
-  return [
-    ...homes,
-    ...articles,
-    {
-      url: absoluteUrl(LANGUAGE_DIRECTORY_PATH),
-      changeFrequency: "monthly" as const,
-      priority: 0.3,
-    },
-  ];
+  return [...homes, ...articles];
 }

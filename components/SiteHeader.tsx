@@ -3,8 +3,9 @@
 import Link from "next/link";
 import { useEffect, useState, type ReactNode } from "react";
 import { LanguagePicker } from "@/components/LanguagePicker";
-import type { TocItem } from "@/lib/content";
-import type { LanguageOption } from "@/lib/i18n";
+import type { LanguageOption } from "@/lib/i18n/locale";
+import { getUiMessages } from "@/lib/i18n/messages";
+import type { TocItem } from "@/lib/markdown";
 import { ThemeToggle } from "./ThemeToggle";
 
 interface SiteHeaderProps {
@@ -23,23 +24,14 @@ export function SiteHeader({
   currentLocale,
   languageOptions,
   toc = [],
-  contentsLabel = "Contents",
+  contentsLabel,
   children,
 }: SiteHeaderProps) {
   const [menuOpen, setMenuOpen] = useState(false);
   const [activeId, setActiveId] = useState<string>();
   const hasToc = toc.length > 0;
-  const menuLabel = currentLocale.startsWith("zh")
-    ? menuOpen
-      ? "关闭目录"
-      : "打开目录"
-    : currentLocale === "ja"
-      ? menuOpen
-        ? "目次を閉じる"
-        : "目次を開く"
-      : menuOpen
-        ? "Close contents"
-        : "Open contents";
+  const copy = getUiMessages(currentLocale).navigation;
+  const menuLabel = menuOpen ? copy.closeContents : copy.openContents;
 
   useEffect(() => {
     if (!hasToc) return;
@@ -103,7 +95,7 @@ export function SiteHeader({
 
       {hasToc ? (
         <aside className="contents-panel" aria-hidden={!menuOpen}>
-          <h2>{contentsLabel}</h2>
+          <h2>{contentsLabel ?? copy.contents}</h2>
           <ol>
             {toc.map((item) => (
               <li key={item.id} className={item.level === 3 ? "toc-level-3" : undefined}>

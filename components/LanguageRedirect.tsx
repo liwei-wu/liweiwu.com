@@ -1,8 +1,8 @@
 "use client";
 
 import { useEffect } from "react";
-import { matchLocale } from "@/lib/i18n";
-import { LANGUAGE_PREFERENCE_KEY } from "@/lib/localization";
+import { matchLocale } from "@/lib/i18n/locale";
+import { readLanguagePreference } from "@/lib/i18n/preferences";
 
 interface LanguageRedirectProps {
   destinations: Record<string, string>;
@@ -15,10 +15,7 @@ export function LanguageRedirect({
 }: LanguageRedirectProps) {
   useEffect(() => {
     const available = Object.keys(destinations);
-    let saved: string | null = null;
-    try {
-      saved = localStorage.getItem(LANGUAGE_PREFERENCE_KEY);
-    } catch {}
+    const saved = readLanguagePreference();
     const locale =
       saved && available.includes(saved)
         ? saved

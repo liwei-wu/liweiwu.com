@@ -1,19 +1,16 @@
 import fs from "node:fs";
 import path from "node:path";
 import matter from "gray-matter";
-import { marked } from "marked";
-import { isAiTranslationLocale } from "@/lib/localization";
+import { isAiTranslationLocale } from "@/lib/i18n/policy";
 
-export type ContentType = "essay" | "note";
 export type TranslationStatus =
   | "original"
   | "author-reviewed"
-  | "human-reviewed"
   | "ai-translated";
 
 export interface ContentDocument {
   id: string;
-  type: ContentType;
+  type: "essay";
   locale: string;
   title: string;
   subtitle?: string;
@@ -29,13 +26,22 @@ export interface ContentDocument {
   readingMinutes: number;
 }
 
-export interface TocItem {
-  id: string;
-  text: string;
-  level: 2 | 3;
+export interface HomeDocument {
+  id: "home";
+  type: "page";
+  locale: string;
+  title: string;
+  description: string;
+  slug: "home";
+  translationStatus: TranslationStatus;
+  sourceLocale: string;
+  sourceHash?: string;
+  body: string;
 }
 
 const CONTENT_ROOT = path.join(process.cwd(), "content");
+const HOME_ROOT = path.join(CONTENT_ROOT, "pages", "home");
+const ESSAYS_ROOT = path.join(CONTENT_ROOT, "essays");
 
 function assertString(value: unknown, field: string, file: string): string {
   if (typeof value !== "string" || !value.trim()) {
@@ -79,6 +85,11 @@ function readContentFile(file: string): ContentDocument {
   const sourceHash =
     typeof data.source_hash === "string" ? data.source_hash.trim() : undefined;
   const slug = assertString(data.slug, "slug", file);
+  const type = assertString(data.type, "type", file);
+
+  if (type !== "essay") {
+    throw new Error(`Essay content must use type: essay in ${file}`);
+  }
 
   if (path.basename(file, ".md") !== locale) {
     throw new Error(`Content filename must match locale ${locale} in ${file}`);
@@ -98,7 +109,7 @@ function readContentFile(file: string): ContentDocument {
 
   return {
     id: assertString(data.id, "id", file),
-    type: assertString(data.type, "type", file) as ContentType,
+    type: "essay",
     locale,
     title: assertString(data.title, "title", file),
     subtitle: typeof data.subtitle === "string" ? data.subtitle.trim() : undefined,
@@ -117,96 +128,110 @@ function readContentFile(file: string): ContentDocument {
   };
 }
 
+function readHomeFile(file: string): HomeDocument {
+  const source = fs.readFileSync(file, "utf8");
+  const { data, content } = matter(source);
+  const locale = assertString(data.locale, "locale", file);
+  const id = assertString(data.id, "id", file);
+  const type = assertString(data.type, "type", file);
+  const slug = assertString(data.slug, "slug", file);
+  const translationStatus = assertString(
+    data.translation_status,
+    "translation_status",
+    file,
+  ) as TranslationStatus;
+  const sourceHash =
+    typeof data.source_hash === "string" ? data.source_hash.trim() : undefined;
+
+  if (id !== "home" || type !== "page" || slug !== "home") {
+    throw new Error(`Home content must use id: home, type: page, and slug: home in ${file}`);
+  }
+  if (path.basename(file, ".md") !== locale) {
+    throw new Error(`Home content filename must match locale ${locale} in ${file}`);
+  }
+  if (isAiTranslationLocale(locale) && translationStatus !== "ai-translated") {
+    throw new Error(
+      `Non-reference locale ${locale} must use translation_status: ai-translated in ${file}`,
+    );
+  }
+  if (isAiTranslationLocale(locale) && !sourceHash) {
+    throw new Error(`AI-translated home content must include source_hash in ${file}`);
+  }
+
+  return {
+    id: "home",
+    type: "page",
+    locale,
+    title: assertString(data.title, "title", file),
+    description: assertString(data.description, "description", file),
+    slug: "home",
+    translationStatus,
+    sourceLocale: assertString(data.source_locale, "source_locale", file),
+    sourceHash,
+    body: content.trim(),
+  };
+}
+
+function findMarkdownFiles(directory: string): string[] {
+  if (!fs.existsSync(directory)) return [];
+  return fs
+    .readdirSync(directory, { withFileTypes: true })
+    .flatMap((entry) => {
+      const entryPath = path.join(directory, entry.name);
+      if (entry.isDirectory()) return findMarkdownFiles(entryPath);
+      return entry.isFile() && entry.name.endsWith(".md") ? [entryPath] : [];
+    });
+}
+
 export function getAllContent(): ContentDocument[] {
   if (!fs.existsSync(CONTENT_ROOT)) return [];
 
-  function findMarkdownFiles(directory: string): string[] {
-    return fs
-      .readdirSync(directory, { withFileTypes: true })
-      .flatMap((entry) => {
-        const entryPath = path.join(directory, entry.name);
-        if (entry.isDirectory()) return findMarkdownFiles(entryPath);
-        return entry.isFile() && entry.name.endsWith(".md") ? [entryPath] : [];
-      });
-  }
-
-  return findMarkdownFiles(CONTENT_ROOT)
+  return findMarkdownFiles(ESSAYS_ROOT)
     .map(readContentFile)
     .sort((a, b) => b.publishedAt.localeCompare(a.publishedAt));
 }
 
-export function getPublishedLocales(): string[] {
-  return [...new Set(getAllContent().map((document) => document.locale))].sort();
+export function getAllHomeContent(): HomeDocument[] {
+  return findMarkdownFiles(HOME_ROOT)
+    .map(readHomeFile)
+    .sort((a, b) => a.locale.localeCompare(b.locale));
 }
 
-export function getContentByLocale(
-  locale: string,
-  type?: ContentType,
-): ContentDocument[] {
-  return getAllContent().filter(
-    (document) => document.locale === locale && (!type || document.type === type),
+export function getHomeContent(locale: string): HomeDocument {
+  const document = getAllHomeContent().find((item) => item.locale === locale);
+  if (!document) throw new Error(`Missing home content for locale ${locale}`);
+  return document;
+}
+
+export function getPublishedLocales(): string[] {
+  const homeLocales = getAllHomeContent().map((document) => document.locale);
+  const homeLocaleSet = new Set(homeLocales);
+  const orphanedPublication = getAllContent().find(
+    (document) => !homeLocaleSet.has(document.locale),
   );
+  if (orphanedPublication) {
+    throw new Error(
+      `Published locale ${orphanedPublication.locale} is missing home content`,
+    );
+  }
+  return [...new Set(homeLocales)].sort();
+}
+
+export function getContentByLocale(locale: string): ContentDocument[] {
+  return getAllContent().filter((document) => document.locale === locale);
 }
 
 export function getContent(
   locale: string,
-  type: ContentType,
   slug: string,
 ): ContentDocument | undefined {
   return getAllContent().find(
     (document) =>
       document.locale === locale &&
-      document.type === type &&
       document.slug === slug,
   );
 }
 
 export function getTranslations(id: string): ContentDocument[] {
   return getAllContent().filter((document) => document.id === id);
-}
-
-function plainText(html: string): string {
-  return html
-    .replace(/<[^>]*>/g, "")
-    .replace(/&amp;/g, "&")
-    .replace(/&lt;/g, "<")
-    .replace(/&gt;/g, ">")
-    .replace(/&quot;/g, '"')
-    .trim();
-}
-
-function slugify(value: string): string {
-  return value
-    .toLocaleLowerCase()
-    .replace(/<[^>]*>/g, "")
-    .replace(/[^\p{Letter}\p{Number}\s-]/gu, "")
-    .trim()
-    .replace(/\s+/g, "-")
-    .replace(/-+/g, "-");
-}
-
-export function renderMarkdown(body: string): { html: string; toc: TocItem[] } {
-  const rawHtml = marked.parse(body, {
-    async: false,
-    gfm: true,
-    breaks: false,
-  }) as string;
-  const toc: TocItem[] = [];
-  const usedIds = new Map<string, number>();
-
-  const html = rawHtml.replace(
-    /<h([23])>([\s\S]*?)<\/h\1>/g,
-    (_match, rawLevel: string, headingHtml: string) => {
-      const level = Number(rawLevel) as 2 | 3;
-      const text = plainText(headingHtml);
-      const baseId = slugify(text) || `section-${toc.length + 1}`;
-      const seen = usedIds.get(baseId) ?? 0;
-      usedIds.set(baseId, seen + 1);
-      const id = seen === 0 ? baseId : `${baseId}-${seen + 1}`;
-      toc.push({ id, text, level });
-      return `<h${level} id="${id}">${headingHtml}</h${level}>`;
-    },
-  );
-
-  return { html, toc };
 }
