@@ -1,9 +1,12 @@
+import Link from "next/link";
 import { notFound } from "next/navigation";
+import { JsonLd } from "@/components/JsonLd";
 import { LanguageRedirect } from "@/components/LanguageRedirect";
 import { SiteHeader } from "@/components/SiteHeader";
 import { getContent, getTranslations, renderMarkdown } from "@/lib/content";
 import { formatDate, getLanguageLabel } from "@/lib/i18n";
 import { contentPath, localeHomePath } from "@/lib/routes";
+import { contentStructuredData } from "@/lib/seo";
 import { siteConfig } from "@/site.config";
 
 interface EssayViewProps {
@@ -35,6 +38,7 @@ export function EssayView({ locale, slug, autoDetect = false }: EssayViewProps) 
       toc={toc}
       contentsLabel={chinese ? "目录" : "Contents"}
     >
+      <JsonLd data={contentStructuredData(essay, translations)} />
       {autoDetect ? (
         <LanguageRedirect
           destinations={Object.fromEntries(
@@ -44,11 +48,15 @@ export function EssayView({ locale, slug, autoDetect = false }: EssayViewProps) 
         />
       ) : null}
       <main className="essay-main">
-        <article className="essay">
+        <article className="essay" aria-labelledby="essay-title">
           <header className="essay-heading">
-            <h1>{essay.title}</h1>
+            <h1 id="essay-title">{essay.title}</h1>
             {essay.subtitle ? <p className="essay-subtitle">{essay.subtitle}</p> : null}
             <p className="essay-meta">
+              <Link rel="author" href={localeHomePath(locale)}>
+                {chinese ? siteConfig.authorChinese : siteConfig.author}
+              </Link>
+              <span aria-hidden="true"> · </span>
               <time dateTime={essay.publishedAt}>
                 {formatDate(essay.publishedAt, locale)}
               </time>
@@ -59,7 +67,10 @@ export function EssayView({ locale, slug, autoDetect = false }: EssayViewProps) 
             </p>
           </header>
 
-          <div className="essay-body" dangerouslySetInnerHTML={{ __html: html }} />
+          <div
+            className="essay-body"
+            dangerouslySetInnerHTML={{ __html: html }}
+          />
 
           <footer className="essay-footer">
             <p>
@@ -73,7 +84,7 @@ export function EssayView({ locale, slug, autoDetect = false }: EssayViewProps) 
               {isAiTranslation ? (
                 <span className="translation-status">
                   <span aria-hidden="true"> · </span>
-                  AI translation
+                  {chinese ? "AI 翻译" : "AI translation"}
                 </span>
               ) : null}
             </p>

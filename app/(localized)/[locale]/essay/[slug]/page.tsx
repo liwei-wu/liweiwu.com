@@ -1,8 +1,7 @@
 import type { Metadata } from "next";
 import { EssayView } from "@/components/EssayView";
 import { getAllContent, getContent, getTranslations } from "@/lib/content";
-import { contentPath } from "@/lib/routes";
-import { siteConfig } from "@/site.config";
+import { contentMetadata } from "@/lib/seo";
 
 interface EssayPageProps {
   params: Promise<{ locale: string; slug: string }>;
@@ -20,33 +19,7 @@ export async function generateMetadata({ params }: EssayPageProps): Promise<Meta
   const { locale, slug } = await params;
   const essay = getContent(locale, "essay", slug);
   if (!essay) return {};
-  const translations = getTranslations(essay.id);
-
-  return {
-    title: essay.title,
-    description: essay.description,
-    authors: [{ name: siteConfig.author }],
-    alternates: {
-      canonical: contentPath(locale, "essay", essay.slug),
-      languages: {
-        ...Object.fromEntries(
-          translations.map((translation) => [
-            translation.locale,
-            contentPath(translation.locale, translation.type, translation.slug),
-          ]),
-        ),
-        "x-default": contentPath("en", "essay", essay.slug),
-      },
-    },
-    openGraph: {
-      type: "article",
-      title: essay.title,
-      description: essay.description,
-      publishedTime: essay.publishedAt,
-      modifiedTime: essay.revisedAt,
-      locale,
-    },
-  };
+  return contentMetadata(essay, getTranslations(essay.id));
 }
 
 export default async function EssayPage({ params }: EssayPageProps) {

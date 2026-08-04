@@ -1,9 +1,11 @@
 import Link from "next/link";
+import { JsonLd } from "@/components/JsonLd";
 import { LanguageRedirect } from "@/components/LanguageRedirect";
 import { SiteHeader } from "@/components/SiteHeader";
 import { getContentByLocale, getPublishedLocales } from "@/lib/content";
 import { formatMonth, getLanguageLabel } from "@/lib/i18n";
 import { contentPath, localeHomePath } from "@/lib/routes";
+import { homeStructuredData } from "@/lib/seo";
 import { siteConfig } from "@/site.config";
 
 interface PublicationHomeProps {
@@ -16,7 +18,9 @@ export function PublicationHome({ locale, autoDetect = false }: PublicationHomeP
   const showTranslationNotice = !chinese && !locale.startsWith("en");
   const essays = getContentByLocale(locale, "essay");
   const notes = getContentByLocale(locale, "note");
-  const localeOptions = getPublishedLocales().map((item) => ({
+  const publications = [...essays, ...notes];
+  const publishedLocales = getPublishedLocales();
+  const localeOptions = publishedLocales.map((item) => ({
     locale: item,
     label: getLanguageLabel(item),
     href: localeHomePath(item),
@@ -29,6 +33,9 @@ export function PublicationHome({ locale, autoDetect = false }: PublicationHomeP
       currentLocale={locale}
       localeOptions={localeOptions}
     >
+      <JsonLd
+        data={homeStructuredData(locale, publications, publishedLocales)}
+      />
       {autoDetect ? (
         <LanguageRedirect
           destinations={Object.fromEntries(
@@ -39,10 +46,13 @@ export function PublicationHome({ locale, autoDetect = false }: PublicationHomeP
       ) : null}
       <main className="home-main">
         <article className="home-content">
+          <h1 className="sr-only">
+            {chinese ? "吴立威（Liwei Wu）" : "Liwei Wu (吴立威)"}
+          </h1>
           {chinese ? (
             <>
               <p>
-                吴立威是一名 AI 应用创业者，也是
+                吴立威（Liwei Wu）是一名 AI 应用创业者，也是
                 <a href="https://deepflywheel.com/">深度飞轮</a>
                 的创始人，致力于探索如何用 AI 构建新一代应用与软件。
               </p>
@@ -57,7 +67,7 @@ export function PublicationHome({ locale, autoDetect = false }: PublicationHomeP
           ) : (
             <>
               <p>
-                Liwei Wu is an AI application entrepreneur and the founder of{" "}
+                Liwei Wu (吴立威) is an AI application entrepreneur and the founder of{" "}
                 <a href="https://deepflywheel.com/">DeepFlywheel</a>, where he
                 explores how AI can be used to build a new generation of
                 applications and software.
@@ -117,7 +127,7 @@ export function PublicationHome({ locale, autoDetect = false }: PublicationHomeP
             <h2>{chinese ? "研究" : "Research"}</h2>
             <ul className="publication-list">
               <li>
-                <a href="https://scholar.google.com/citations?user=dg1JyaUAAAAJ">
+                <a href={siteConfig.scholarUrl} rel="me">
                   Google Scholar
                 </a>
               </li>

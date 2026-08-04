@@ -12,7 +12,8 @@
     "test": "npm run build && node --test tests/*.test.mjs",
     "lint": "eslint . --ignore-pattern out --ignore-pattern .next",
     "typecheck": "tsc --noEmit",
-    "translate": "node scripts/translate.mjs"
+    "translate": "node scripts/translate.mjs",
+    "submit:indexing": "node scripts/submit-indexing.mjs"
   },
   "dependencies": {
     "gray-matter": "4.0.3",

@@ -1,8 +1,11 @@
+import type { Metadata } from "next";
 import { notFound } from "next/navigation";
-import { LocaleDocument } from "@/components/LocaleDocument";
+import "../../globals.css";
+import { DocumentShell } from "@/components/DocumentShell";
 import { getPublishedLocales } from "@/lib/content";
 import { isRtl } from "@/lib/i18n";
 import { DEFAULT_LOCALE } from "@/lib/routes";
+import { rootMetadata } from "@/lib/seo";
 
 export const dynamicParams = false;
 
@@ -12,7 +15,16 @@ export function generateStaticParams() {
     .map((locale) => ({ locale }));
 }
 
-export default async function LocaleLayout({
+export async function generateMetadata({
+  params,
+}: {
+  params: Promise<{ locale: string }>;
+}): Promise<Metadata> {
+  const { locale } = await params;
+  return rootMetadata(locale);
+}
+
+export default async function LocaleRootLayout({
   children,
   params,
 }: Readonly<{
@@ -24,9 +36,8 @@ export default async function LocaleLayout({
   const dir = isRtl(locale) ? "rtl" : "ltr";
 
   return (
-    <div className="locale-root" lang={locale} dir={dir}>
-      <LocaleDocument locale={locale} dir={dir} />
+    <DocumentShell lang={locale} dir={dir}>
       {children}
-    </div>
+    </DocumentShell>
   );
 }

@@ -1,63 +1,94 @@
-# Liwei Wu — personal publication
+# 吴立威的个人写作网站
 
-A static, Markdown-first personal publication about AI, software, and authorship. The visual and structural benchmark is [darioamodei.com](https://darioamodei.com/): restrained typography, a single reading column, an optional table of contents, and light/dark appearance. This site adds locale-aware URLs and transparent AI translation status.
+一个以 Markdown 为内容源的静态个人网站，关注 AI、软件与作者身份。设计参考 [darioamodei.com](https://darioamodei.com/)：克制的排版、单栏阅读、按需显示的目录，以及深浅色主题。网站支持多语言 URL，并明确标注 AI 翻译内容。
 
-## Author
+## 作者
 
-- Chinese name: 吴立威
-- English name: Liwei Wu
+- 中文名：吴立威
+- 英文名：Liwei Wu
 
-## Local development
+## 本地开发
 
 ```bash
 npm install
 npm run dev
 ```
 
-Open <http://localhost:3000>. English is the default edition and uses unprefixed URLs. The root route detects the browser language, respects a saved manual choice, and falls back to English when no published edition matches.
+打开 <http://localhost:3000>。英文为默认语言，URL 不带语言前缀。根路由优先使用用户保存的语言偏好，其次匹配浏览器语言；若没有对应的已发布版本，则使用英文。
 
-Production verification:
+构建并运行测试：
 
 ```bash
 npm test
 ```
 
-The build is a static export in `out/`, so it can be hosted on any static web host. This repository contains no Codex Sites deployment configuration.
+构建结果导出到 `out/`，可部署至任意静态托管服务。本仓库不含 Codex Sites 部署配置。
 
-## Publish an article
+## 搜索与 AI 收录
 
-Add a Markdown file under:
+构建会生成以下公开入口：
+
+- `/sitemap.xml`：包含多语言关联的站点地图
+- `/robots.txt`：允许主流搜索引擎及 AI 搜索爬虫访问
+- `/feed.xml`：全文 RSS Feed
+- `/llms.txt` 与 `/llms-full.txt`：面向 AI 工具的内容索引
+
+如需验证站点所有权，请在 `.env.local` 中填写对应平台提供的验证值，并重新构建。支持 Google、Bing、百度、360、搜狗和 Yandex。
+
+配置 `INDEXNOW_KEY` 或百度搜索资源平台提供的完整 `BAIDU_PUSH_ENDPOINT`，部署最新构建后主动提交 URL：
+
+```bash
+npm run submit:indexing
+```
+
+提交前可用 `npm run submit:indexing -- --dry-run` 核对 URL 数量。验证值和百度提交地址不得提交到仓库。
+
+上线、验证和各站长平台的操作顺序见 [搜索收录运行手册](docs/search-discovery.md)。
+
+## 发布文章
+
+在以下目录添加 Markdown 文件：
 
 ```text
 content/zh-Hans/essays/<slug>.md
 ```
 
-Use the existing first essay as the frontmatter template. Restart the development server after adding a new file so static route parameters are refreshed.
+以现有文章的 Front Matter 为模板。添加文件后重启开发服务器，使静态路由参数生效。
 
-## Generate translations
+## 生成翻译
 
-Copy `.env.example` to `.env.local`, add an OpenAI API key, and export the variables into your shell. Generate one language:
+复制环境变量示例，填入 OpenAI API 密钥，再将变量导入当前 shell：
+
+```bash
+cp .env.example .env.local
+# 编辑 .env.local 后执行：
+set -a
+source .env.local
+set +a
+```
+
+生成单个语言版本：
 
 ```bash
 npm run translate -- --locale en
 ```
 
-Regenerate a stale translation:
+强制重新生成翻译：
 
 ```bash
 npm run translate -- --locale en --force
 ```
 
-Generate all configured languages only after reviewing the expected API cost:
+确认 API 费用后，生成全部目标语言：
 
 ```bash
 CONFIRM_ALL_TRANSLATIONS=1 npm run translate -- --all
 ```
 
-Generated files are ordinary Markdown and include `source_hash`. Unchanged translations are skipped. After personally reviewing Chinese or English, change `translation_status` to `original` or `author-reviewed`; untouched outputs remain visibly marked `ai-translated`.
+译文以普通 Markdown 文件保存，并包含 `source_hash`；源文未变时会跳过生成。简体中文原稿使用 `original`，人工审校后的译文使用 `author-reviewed`，未经审校的译文保留 `ai-translated` 标记。
 
-## Locale policy
+## 语言规则
 
-`languages.json` contains 185 tags: the current ISO 639 Set 1 list with `zh` replaced by `zh-Hans` and `zh-Hant`. Region variants collapse to their base language; for example, `zh-Hant-HK` and `zh-Hant-TW` both match `zh-Hant`.
+`languages.json` 包含 185 个语言标签：采用现行 ISO 639 Set 1 列表，并以 `zh-Hans` 和 `zh-Hant` 取代 `zh`。地区变体会匹配相应的基础语言，例如 `zh-Hant-HK` 和 `zh-Hant-TW` 均匹配 `zh-Hant`。
 
-English pages live at `/` and `/essay/<slug>/`. Every other language is explicitly prefixed, such as `/zh-Hans/` and `/zh-Hans/essay/<slug>/`. A language switch stays on the corresponding article whenever that translation exists.
+英文页面使用 `/` 和 `/essay/<slug>/`；其他语言带语言前缀，如 `/zh-Hans/` 和 `/zh-Hans/essay/<slug>/`。若当前文章有对应译文，切换语言后仍会停留在该文章。
